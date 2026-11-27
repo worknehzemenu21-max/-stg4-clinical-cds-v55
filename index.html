@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STG 4th Ed. Clinical CDS App</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: #f1f5f9; color: #0f172a; }
+    .app-wrap { max-width: 560px; margin: 0 auto; padding: 14px 12px 36px; }
+    .top-header {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+      padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+    .top-header h1 { margin: 0 0 4px 0; font-size: 1.35rem; color: #0f4c81; }
+    .subtitle { margin: 0 0 12px 0; font-size: 0.9rem; color: #475569; line-height: 1.4; }
+    .pill-counter {
+      display: inline-block; background: #dcfce7; color: #166534;
+      font-weight: 700; font-size: 0.85rem; padding: 5px 11px; border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .nav-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .nav-btn {
+      border: 1px solid #cbd5e1; background: #fff; color: #1e293b;
+      padding: 8px 12px; border-radius: 9px; font-weight: 700; font-size: 0.85rem; cursor: pointer;
+    }
+    .nav-btn.active { background: #0f4c81; color: #fff; border-color: #0f4c81; }
+    .step-badge {
+      display: inline-block; background: #e0f2fe; color: #0369a1;
+      font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    .card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+      padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+    .card.direct-card { border-color: #99f6e4; background: #f0fdfa; }
+    .card h2 { margin: 0 0 6px 0; font-size: 1.08rem; color: #0f172a; }
+    .card-desc { margin: 0 0 12px 0; font-size: 0.86rem; color: #475569; line-height: 1.45; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    label { display: block; font-weight: 700; font-size: 0.86rem; margin-bottom: 4px; color: #1e293b; }
+    input, select, textarea {
+      width: 100%; padding: 10px 11px; border: 1px solid #cbd5e1;
+      border-radius: 9px; font-size: 0.92rem; background: #fff; margin-bottom: 10px;
+    }
+    textarea { min-height: 76px; resize: vertical; }
+    .btn {
+      width: 100%; border: none; border-radius: 10px; padding: 12px 14px;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    }
+    .btn-blue { background: #0f4c81; color: #fff; }
+    .btn-blue:hover { background: #09355c; }
+    .btn-teal { background: #0f766e; color: #fff; }
+    .btn-teal:hover { background: #115e59; }
+    .btn-light { background: #e2e8f0; color: #0f172a; margin-top: 8px; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .option-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .option-item {
+      display: flex; align-items: flex-start; gap: 10px; padding: 11px 12px;
+      border: 1px solid #cbd5e1; border-radius: 10px; background: #f8fafc;
+      cursor: pointer; font-size: 0.9rem; line-height: 1.35;
+    }
+    .option-item.selected { border-color: #0f4c81; background: #eff6ff; font-weight: 600; }
+    .option-item input { width: auto; margin: 2px 0 0 0; }
+    .inv-group-card {
+      border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px;
+      margin-bottom: 12px; background: #f8fafc;
+    }
+    .inv-header-row {
+      display: flex; align-items: flex-start; gap: 10px; font-weight: 700;
+      font-size: 0.93rem; color: #0f4c81; cursor: pointer; margin-bottom: 8px;
+    }
+    .inv-header-row input { width: auto; margin: 2px 0 0 0; }
+    .exp-sub-label {
+      font-size: 0.8rem; font-weight: 700; color: #0f766e;
+      margin: 4px 0 6px 24px;
+    }
+    .exp-sub-list {
+      display: flex; flex-direction: column; gap: 6px; margin-left: 24px;
+    }
+    .exp-option-item {
+      display: flex; align-items: flex-start; gap: 8px; padding: 9px 10px;
+      border: 1px solid #99f6e4; border-radius: 9px; background: #fff;
+      cursor: pointer; font-size: 0.86rem; line-height: 1.35;
+    }
+    .exp-option-item.selected { border-color: #0f766e; background: #f0fdfa; font-weight: 600; }
+    .exp-option-item input { width: auto; margin: 2px 0 0 0; }
+    .hint-count { font-size: 0.82rem; font-weight: 700; color: #0369a1; margin-bottom: 8px; }
+    .hint-count.teal { color: #0f766e; }
+    .info-box {
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+      padding: 12px; margin-bottom: 12px; font-size: 0.88rem; line-height: 1.48;
+    }
+    .teach-box {
+      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px;
+      padding: 12px; margin-bottom: 12px; font-size: 0.88rem; line-height: 1.48;
+    }
+    .tx-block { margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
+    .tx-block:last-of-type { border-bottom: none; }
+    .tx-block h3 { margin: 0 0 6px 0; font-size: 0.96rem; color: #0f172a; }
+    ul { margin: 0; padding-left: 18px; }
+    li { margin-bottom: 5px; font-size: 0.9rem; line-height: 1.42; }
+  </style>
+</head>
+<body>
+  <div class="app-wrap">
+    <div class="top-header">
+      <h1>STG 4th Ed. Clinical CDS App</h1>
+      <p class="subtitle">Web + App Ready • Ethiopian STG 4th Edition Teaching &amp; Clinical Decision Support</p>
+      <div class="pill-counter" id="casesCounter">Cases Completed: 105</div>
+      <div class="nav-row">
+        <button class="nav-btn active" id="navWorkflow" onclick="showView('viewPage1')">Clinical Workflow</button>
+        <button class="nav-btn" id="navUsage" onclick="showView('viewUsage')">Usage &amp; Billing</button>
+        <button class="nav-btn" id="navOwner" onclick="showView('viewOwner')">Owner Update</button>
+      </div>
+    </div>
+
+    <!-- PAGE 1 -->
+    <section id="viewPage1" class="view active">
+      <div class="step-badge">Page 1 • Full Case Input OR 2-Page Direct Diagnosis</div>
+
+      <div class="card">
+        <h2>1. Patient Demographics &amp; Ward (Optional)</h2>
+        <div class="grid-2">
+          <div>
+            <label for="ageInput">Age (Optional)</label>
+            <input id="ageInput" type="text" placeholder="e.g. 26 or 4 months" />
+          </div>
+          <div>
+            <label for="weightInput">Weight kg (Optional)</label>
+            <input id="weightInput" type="text" placeholder="e.g. 55 or 12" />
+          </div>
+          <div>
+            <label for="sexInput">Sex (Optional)</label>
+            <select id="sexInput">
+              <option value="Not specified">Not specified</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+          <div>
+            <label for="wardInput">Ward / Section (Optional)</label>
+            <select id="wardInput">
+              <option value="Auto / All Wards">Auto / All Wards</option>
+              <option value="Medical">Medical</option>
+              <option value="Surgical">Surgical</option>
+              <option value="Pediatrics">Pediatrics</option>
+              <option value="Obs/Gyn">Obs/Gyn</option>
+              <option value="Psychiatry">Psychiatry</option>
+              <option value="Respiratory / Renal / Rheum / Neuro / Onc">Respiratory / Renal / Rheum / Neuro / Onc</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>2. Vital Signs (Optional if using Direct Diagnosis)</h2>
+        <div class="grid-2">
+          <div>
+            <label for="bpInput">BP (mmHg)</label>
+            <input id="bpInput" type="text" placeholder="e.g. 110/70" />
+          </div>
+          <div>
+            <label for="prInput">PR</label>
+            <input id="prInput" type="text" placeholder="88" />
+          </div>
+          <div>
+            <label for="rrInput">RR</label>
+            <input id="rrInput" type="text" placeholder="16" />
+          </div>
+          <div>
+            <label for="tempInput">Temp (°C)</label>
+            <input id="tempInput" type="text" placeholder="36.8" />
+          </div>
+        </div>
+        <div>
+          <label for="spo2Input">SpO2 (%)</label>
+          <input id="spo2Input" type="text" placeholder="96" />
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>3. Chief Complaint &amp; Duration (For 4-Page Guided Flow)</h2>
+        <label for="ccInput">ዋና የሕመም ቅሬታ (Chief Complaint)</label>
+        <textarea id="ccInput" placeholder="ለምሳሌ: Cough, Fever, Shortness of breath, Flank pain, Joint swelling, Headache, Low mood..."></textarea>
+
+        <label for="durInput">የሕመም ቆይታ (Duration)</label>
+        <input id="durInput" type="text" placeholder="ለምሳሌ: 2 days, 1 week" />
+
+        <button class="btn btn-blue" onclick="enterFourPagePage2Symptoms()">Chief Complaint / Vitals Enter →</button>
+      </div>
+
+      <div class="card direct-card">
+        <h2>4. Direct Diagnosis (2-Page Shortcut — Skip Full Chief Complaint &amp; Vitals)</h2>
+        <p class="card-desc">
+          በአምስቱ ዋርዶች (Medical, Surgical, Pediatrics, Obs/Gyn, Psychiatry) ውስጥ ያለ ማንኛውንም Diagnosis እዚህ ሲያስገቡ በቀጥታ ወደ Page 2 (Treatment &amp; Non-Pharmacological Care) ይሄዳል።
+        </p>
+
+        <label for="directDiagInput">የራስዎ Diagnosis (Enter Diagnosis Directly)</label>
+        <input id="directDiagInput" list="stgDiagSuggestions" type="text" placeholder="ለምሳሌ: Pneumonia, Gout, AKI, CKD, Stroke, Depression..." />
+        <datalist id="stgDiagSuggestions"></datalist>
+
+        <label for="directNotesInput">ቆይታ / Notes (Optional)</label>
+        <input id="directNotesInput" type="text" placeholder="ለምሳሌ: 3 days, acute, adult..." />
+
+        <button class="btn btn-teal" onclick="enterTwoPageDirect()">Direct Diagnosis Enter → (Page 2)</button>
+      </div>
+    </section>
+
+    <!-- PAGE 2: DIAGNOSIS-LEADING SIGNS & SYMPTOMS FROM ALL PAGE 1 INPUTS -->
+    <section id="viewPage2Symptoms" class="view">
+      <div class="step-badge">4-Page Flow • Page 2 of 4 (Diagnosis-Leading Signs &amp; Symptoms)</div>
+      <div class="card">
+        <h2>Signs &amp; Symptoms Leading to a Diagnosis</h2>
+        <p class="card-desc" id="symptomPromptDesc"></p>
+        <div class="hint-count" id="symptomClickCount">Marked Signs/Symptoms: 0 (Mark to lead toward a specific diagnosis)</div>
+        <div class="option-list" id="relatedSymptomsList"></div>
+        <button class="btn btn-blue" onclick="enterFourPagePage3Investigations()">Confirm Signs &amp; Symptoms → Page 3 (Investigations &amp; Expected Results)</button>
+        <button class="btn btn-light" onclick="showView('viewPage1')">← Back to Page 1</button>
+      </div>
+    </section>
+
+    <!-- PAGE 3: INVESTIGATIONS FROM PAGE 1 & 2 + EXPECTED RESULT OPTIONS UNDER EACH INVESTIGATION -->
+    <section id="viewPage3Inv" class="view">
+      <div class="step-badge">4-Page Flow • Page 3 of 4 (Investigations &amp; Expected Results)</div>
+      <div class="card">
+        <h2>Generated Investigations &amp; Expected Result Options</h2>
+        <p class="card-desc" id="invPromptDesc"></p>
+        <div class="hint-count" id="invSelectedCount">Marked Investigations: 0</div>
+        <div class="hint-count teal" id="expectedResultCount">Clicked Expected Results: 0</div>
+
+        <div id="investigationWithExpectedList"></div>
+
+        <label for="customInvInput">Additional Investigation / Result (Optional)</label>
+        <input id="customInvInput" type="text" placeholder="e.g. Sputum AFB, Creatinine, CXR result..." />
+        <button class="btn btn-blue" onclick="enterFourPagePage4Treatment()">Generate Diagnosis &amp; Treatment → Page 4</button>
+        <button class="btn btn-light" onclick="showView('viewPage2Symptoms')">← Back to Page 2 (Signs &amp; Symptoms)</button>
+      </div>
+    </section>
+
+    <!-- FINAL TREATMENT PAGE (PAGE 2 OF 2 FOR DIRECT FLOW OR PAGE 4 OF 4 FOR CLINICAL FLOW) -->
+    <section id="viewTreatment" class="view">
+      <div class="card" id="treatmentSheet"></div>
+    </section>
+
+    <!-- USAGE & BILLING TAB -->
+    <section id="viewUsage" class="view">
+      <div class="card">
+        <h2>Usage &amp; Billing Summary</h2>
+        <p class="card-desc" id="usageSummaryText"></p>
+        <button class="btn btn-blue" onclick="showView('viewPage1')">Back to Clinical Workflow</button>
+      </div>
+    </section>
+
+    <!-- OWNER UPDATE TAB -->
+    <section id="viewOwner" class="view">
+      <div class="card">
+        <h2>Owner Update — Completed Cases Counter</h2>
+        <label for="ownerCasesInput">Set Completed Cases Count</label>
+        <input id="ownerCasesInput" type="number" min="0" />
+        <button class="btn btn-blue" onclick="saveOwnerCases()">Save Count</button>
+        <button class="btn btn-light" onclick="showView('viewPage1')">Back to Clinical Workflow</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STG4_RECORDS = [
+      {
+        id: "9.1", ch: 9, sec: "9.1", page: 510,
+        en: "ACUTE KIDNEY INJURY (AKI)", am: "ድንገተኛ የኩላሊት ጉዳት (AKI)",
+        kw: ["aki", "kidney", "renal", "oliguria", "anuria", "creatinine", "urea", "hyperkalemia", "flank", "ኩላሊት", "ሽንት"],
+        symptoms: ["Decreased urine output (oliguria/anuria)", "Fluid overload / facial or leg swelling", "Nausea, lethargy, or uremic confusion", "Flank/abdominal discomfort or volume depletion"],
+        invPairs: [
+          { inv: "Serum Creatinine, Urea & eGFR", expected: ["Rising serum creatinine/urea or falling eGFR", "Stable or baseline renal function"] },
+          { inv: "Urinalysis & Urine Microscopy", expected: ["Oliguria / concentrated urine or tubular casts", "Hematuria / proteinuria or normal sediment"] },
+          { inv: "Serum Electrolytes & Renal Ultrasound", expected: ["Hyperkalemia or metabolic acidosis", "Normal or obstructed urinary tract on ultrasound"] }
+        ],
+        clues: "Assess urine output, volume status, creatinine/urea, K+, acid-base status, and nephrotoxin exposure.",
+        rationale: "Restore perfusion/euvolemia when volume-depleted, treat acute hyperkalemia urgently, stop nephrotoxins, and arrange dialysis if refractory.",
+        firstLine: ["IV Crystalloid fluids (Prerenal / volume depletion • Route: IV • Duration: until euvolemia restored)", "Calcium gluconate / Insulin + Dextrose (Acute hyperkalemia • Route: IV STAT • Duration: as indicated)"],
+        secondLine: ["Hemodialysis / Renal Replacement Therapy (Refractory hyperkalemia, severe acidosis, volume overload/pulmonary edema, uremia • Route: RRT • Duration: per nephrology protocol)"],
+        intervention: "Urgent hemodialysis or relief of urinary tract obstruction if post-renal cause is present.",
+        nutritional: "Adjust fluid, sodium, potassium, and protein intake according to volume status, electrolytes, and AKI severity.",
+        nonPharma: "Strict intake/output monitoring; avoid nephrotoxic drugs (NSAIDs, aminoglycosides, contrast); educate on warning signs."
+      },
+      {
+        id: "9.2", ch: 9, sec: "9.2", page: 514,
+        en: "CHRONIC KIDNEY DISEASE (CKD)", am: "ሥር የሰደደ የኩላሊት በሽታ (CKD)",
+        kw: ["ckd", "chronic kidney", "egfr", "proteinuria", "albuminuria", "anemia", "dialysis", "ሥር የሰደደ የኩላሊት"],
+        symptoms: ["Fatigue or pallor from chronic anemia", "Lower-limb edema or elevated BP", "Nocturia or frothy urine (albuminuria)", "Anorexia or uremic symptoms in advanced CKD"],
+        invPairs: [
+          { inv: "Serum Creatinine, Urea & eGFR", expected: ["Persistently reduced eGFR (<60 mL/min/1.73m²) >= 3 months", "Mildly reduced or fluctuating eGFR"] },
+          { inv: "Urine Albumin/Protein & Urinalysis", expected: ["Persistent albuminuria/proteinuria", "Negative or trace proteinuria"] },
+          { inv: "CBC, Iron Panel & Renal Ultrasound", expected: ["Normocytic anemia or CKD-MBD lab changes", "Small/contracted or echogenic kidneys on ultrasound"] }
+        ],
+        clues: "Evaluate eGFR and albuminuria/proteinuria over >= 3 months, BP, glycemic control, anemia, and CKD-MBD markers.",
+        rationale: "Slow progression with ACEi/ARB when indicated, manage anemia and bone-mineral complications, adjust drug doses by eGFR, and prepare for RRT.",
+        firstLine: ["ACE inhibitor or ARB (CKD with albuminuria/proteinuria or diabetes/hypertension • Route: PO • Duration: long-term titrated per STG)", "Iron supplementation ± ESA (CKD-associated anemia • Route: PO/IV or SC • Duration: per hemoglobin/iron indices)"],
+        secondLine: ["Phosphate binders / Active Vitamin D (CKD-MBD • Route: PO • Duration: per serum PO4/Ca/PTH)", "Hemodialysis / Peritoneal Dialysis / Kidney Transplant (ESKD • Route: RRT/Surgical • Duration: long-term)"],
+        intervention: "Dialysis access creation or kidney transplantation evaluation for end-stage kidney disease.",
+        nutritional: "Restrict sodium; tailor protein, potassium, and phosphate intake per CKD stage and dialysis status.",
+        nonPharma: "Stop smoking; avoid nephrotoxins and unverified herbal remedies; adjust drug doses by eGFR and monitor labs regularly."
+      },
+      {
+        id: "9.3", ch: 9, sec: "9.3", page: 521,
+        en: "ELECTROLYTE ABNORMALITIES", am: "የኤሌክትሮላይት መዛባቶች",
+        kw: ["electrolyte", "hypokalemia", "hyperkalemia", "hyponatremia", "potassium", "sodium", "ኤሌክትሮላይት"],
+        symptoms: ["Muscle weakness, cramps, or paresthesia", "Palpitations or irregular heartbeat", "Confusion, headache, or drowsiness", "Vomiting, diarrhea, or diuretic-related loss"],
+        invPairs: [
+          { inv: "Serum Electrolytes (Na+, K+, Cl-, Ca2+)", expected: ["Abnormal K+, Na+, or Ca2+ level", "Normal baseline electrolyte panel"] },
+          { inv: "12-Lead ECG", expected: ["Peaked T/wide QRS or U waves/ST depression", "Normal sinus rhythm without electrolyte wave changes"] },
+          { inv: "Serum Osmolality & Renal Function", expected: ["Abnormal osmolality/urine Na+ or renal impairment", "Normal osmolality and renal function"] }
+        ],
+        clues: "Check serum Na+, K+, Ca2+, ECG, neuromuscular/neurologic signs, volume status, and offending drugs (diuretics, ACEi, NSAIDs).",
+        rationale: "Correct severe/symptomatic electrolyte imbalances safely within STG correction limits to prevent arrhythmias and osmotic demyelination.",
+        firstLine: ["Potassium chloride (Hypokalemia • Route: PO or controlled IV • Duration: until corrected per STG limits)", "Calcium gluconate + Insulin/Dextrose (Severe hyperkalemia • Route: IV STAT • Duration: per acute protocol)", "Hypertonic saline (3% NaCl) or appropriate fluid (Severe symptomatic hyponatremia • Route: IV / PO • Duration: controlled rate per STG)"],
+        secondLine: ["Cation exchange resin / Bisphosphonate / Calcitonin / Hemodialysis (Refractory or severe electrolyte disorder • Route: PO/PR/IV/RRT • Duration: per indication)"],
+        intervention: "Urgent hemodialysis or cardiology/nephrology care for refractory hyperkalemia or severe life-threatening imbalance.",
+        nutritional: "Adjust fluids, salt, or potassium-rich foods carefully according to the specific electrolyte abnormality.",
+        nonPharma: "Close fluid/electrolyte and ECG monitoring; avoid overly rapid sodium correction; review diuretics/offending drugs."
+      },
+      {
+        id: "9.4", ch: 9, sec: "9.4", page: 543,
+        en: "GLOMERULAR DISEASES", am: "የግሎሜሩላር በሽታዎች",
+        kw: ["glomerular", "nephrotic", "nephritic", "edema", "proteinuria", "hematuria", "ግሎሜሩላር", "እብጠት"],
+        symptoms: ["Periorbital or generalized edema", "Dark/cola-colored urine or hematuria", "Frothy urine from heavy proteinuria", "Elevated blood pressure or oliguria"],
+        invPairs: [
+          { inv: "Urinalysis & Urine Protein:Creatinine", expected: ["Heavy proteinuria or dysmorphic RBCs/RBC casts", "Mild proteinuria or microscopic hematuria"] },
+          { inv: "Serum Albumin, Creatinine & Lipids", expected: ["Hypoalbuminemia + hyperlipidemia", "Normal albumin with raised/normal creatinine"] },
+          { inv: "Complement (C3/C4) & Autoimmune Screen", expected: ["Low C3/C4 or positive serology", "Normal complement and negative serology"] }
+        ],
+        clues: "Assess edema, hypertension, hematuria, proteinuria/hypoalbuminemia, renal function, and systemic autoimmune/infectious triggers.",
+        rationale: "Reduce proteinuria and control volume/BP, treat steroid-responsive glomerular disease, and prevent infection or thrombosis.",
+        firstLine: ["ACE inhibitor or ARB (Proteinuria / hypertension • Route: PO • Duration: long-term per STG)", "Loop / Thiazide diuretic (Edema / volume overload • Route: PO or IV • Duration: per edema & STG)", "Prednisolone (Steroid-responsive glomerular disease • Route: PO • Duration: tapering course per weight & STG)"],
+        secondLine: ["Immunosuppressants: Cyclophosphamide / MMF / Calcineurin inhibitor / Rituximab (Steroid-resistant/relapsing disease • Route: PO or IV • Duration: per specialist/STG)"],
+        intervention: "Renal biopsy or specialist nephrology management for diagnostic classification or refractory disease.",
+        nutritional: "Low-sodium diet; balance protein and fluid intake according to nephrotic/nephritic status and renal function.",
+        nonPharma: "Track daily weight and fluid balance; prevent infection and thromboembolism; do not stop steroids abruptly."
+      },
+      {
+        id: "9.5", ch: 9, sec: "9.5", page: 552,
+        en: "BENIGN PROSTATIC HYPERPLASIA (BPH)", am: "የፕሮስቴት እጢ ማበጥ (BPH)",
+        kw: ["bph", "prostate", "urinary", "frequency", "nocturia", "hesitancy", "retention", "ፕሮስቴት", "ሽንት"],
+        symptoms: ["Urinary frequency or nocturia", "Hesitancy, weak stream, or intermittency", "Feeling of incomplete bladder emptying", "Urgency or difficulty starting urination"],
+        invPairs: [
+          { inv: "Urinalysis & Post-Void Residual (PVR)", expected: ["Elevated PVR with negative/uncomplicated urinalysis", "Normal PVR without infection"] },
+          { inv: "PSA, DRE & Renal Function", expected: ["Enlarged prostate / age-appropriate PSA", "Normal creatinine without urinary obstruction"] }
+        ],
+        clues: "Evaluate LUTS, post-void residual, urinalysis, PSA if indicated, and red flags (acute retention, hematuria, UTI).",
+        rationale: "Relieve LUTS with alpha-blockers, reduce prostate progression with 5-ARI, and relieve urinary retention promptly.",
+        firstLine: ["Alpha-1 blocker e.g. Tamsulosin / Doxazosin (Symptomatic BPH LUTS • Route: PO • Duration: ongoing e.g. tamsulosin 0.4 mg once daily)", "5-alpha reductase inhibitor e.g. Finasteride (Enlarged prostate / progression prevention • Route: PO • Duration: long-term e.g. 5 mg once daily)"],
+        secondLine: ["Antimuscarinic / Beta-3 agonist or TURP (Persistent storage LUTS or BPH complications • Route: PO or Surgical • Duration: per STG/urology)"],
+        intervention: "Catheterization for acute urinary retention; TURP/urologic surgery for refractory symptoms or complications.",
+        nutritional: "Reduce evening fluid intake before sleep; limit caffeine and alcohol.",
+        nonPharma: "Double voiding; seek urgent care if unable to pass urine; educate on gradual symptom improvement."
+      },
+      {
+        id: "9.6", ch: 9, sec: "9.6", page: 558,
+        en: "URINARY INCONTINENCE (UI)", am: "ያለፍቃድ የሽንት መፍሰስ (UI)",
+        kw: ["incontinence", "urgency", "leakage", "bladder", "kegel", "ሽንት መፍሰስ"],
+        symptoms: ["Sudden strong urge followed by leakage", "Leakage with cough, sneeze, or exertion", "Frequent daytime or nighttime voiding", "Dribbling or incomplete emptying"],
+        invPairs: [
+          { inv: "Urinalysis & Urine Culture", expected: ["Negative for acute UTI", "Positive/equivocal requiring infection check"] },
+          { inv: "Post-Void Residual & Bladder Diary", expected: ["Urgency/frequency or stress leakage pattern", "Elevated PVR suggesting overflow component"] }
+        ],
+        clues: "Differentiate urge, stress, overflow, or mixed UI; screen for UTI, reversible causes, and red flags.",
+        rationale: "Combine behavioral/pelvic floor interventions with targeted pharmacotherapy or surgical/catheter options when indicated.",
+        firstLine: ["Antimuscarinic e.g. Oxybutynin / Tolterodine (Urge UI / overactive bladder • Route: PO • Duration: trial & review per STG)"],
+        secondLine: ["Beta-3 agonist Mirabegron / Surgical or Catheterization therapy (Refractory urge, stress, or overflow UI • Route: PO / Surgical / Catheter • Duration: per STG)"],
+        intervention: "Targeted surgical repair or catheterization when indicated after specialist evaluation.",
+        nutritional: "Reduce caffeine, alcohol, and bladder irritants; maintain healthy weight.",
+        nonPharma: "Daily pelvic floor (Kegel) exercises, bladder training, timed voiding, and barrier skin care."
+      },
+      {
+        id: "9.7", ch: 9, sec: "9.7", page: 564,
+        en: "UROLITHIASIS/NEPHROLITHIASIS", am: "የኩላሊት እና የሽንት ቧንቧ ጠጠር",
+        kw: ["stone", "urolithiasis", "nephrolithiasis", "renal colic", "flank pain", "hematuria", "ጠጠር", "ወገብ ህመም"],
+        symptoms: ["Severe colicky flank pain radiating to groin", "Hematuria or painful/frequent urination", "Nausea or vomiting with colic", "Fever or chills (red flag for infection/obstruction)"],
+        invPairs: [
+          { inv: "Urinalysis", expected: ["Microscopic or gross hematuria", "Pyuria/nitrites or normal urinalysis"] },
+          { inv: "Renal/Abdominal Ultrasound or CT KUB", expected: ["Renal/ureteral stone or hydronephrosis", "No obstructing stone seen on initial scan"] },
+          { inv: "Serum Creatinine, Electrolytes & CBC", expected: ["Normal or mildly elevated creatinine without sepsis", "Leukocytosis or renal impairment"] }
+        ],
+        clues: "Assess colicky flank/groin pain, hematuria, urinalysis, renal function/imaging, and urgent red flags (fever/urosepsis, anuria).",
+        rationale: "Control acute colic pain rapidly, aid ureteral stone passage when appropriate, and refer urgently if infected or obstructing.",
+        firstLine: ["NSAID e.g. Diclofenac or Opioid (Acute renal colic pain • Route: IM/IV/PO • Duration: short-term until pain controlled)", "Tamsulosin (Medical expulsive therapy for ureteral stone • Route: PO • Duration: per STG e.g. 0.4 mg once daily)"],
+        secondLine: ["Potassium citrate / Thiazide / ESWL / Ureteroscopy / PCNL (Prevention or non-passing/obstructing stones • Route: PO or Urologic procedure • Duration: per indication)"],
+        intervention: "Urgent decompression/drainage if infected/obstructed; ESWL, ureteroscopy, or PCNL as indicated.",
+        nutritional: "Maintain high fluid intake for urine output >= 2–2.5 L/day (unless restricted) and reduce excess dietary sodium.",
+        nonPharma: "Strain urine to collect stone; seek emergency care for fever, chills, intractable vomiting, or inability to pass urine."
+      },
+      {
+        id: "10.1", ch: 10, sec: "10.1", page: 570,
+        en: "OVERVIEW ON CONNECTIVE TISSUE DISEASES", am: "የኮኔክቲቭ ቲሹ በሽታዎች አጠቃላይ እይታ",
+        kw: ["connective tissue", "ctd", "autoimmune", "joint", "rash", "rheumatology", "ኮኔክቲቭ ቲሹ"],
+        symptoms: ["Inflammatory joint pain or swelling", "Skin rash or photosensitivity", "Fatigue, fever, or weight loss", "Dry eyes/mouth or Raynaud-like symptoms"],
+        invPairs: [
+          { inv: "CBC, ESR & CRP", expected: ["Elevated ESR/CRP or mild cytopenia/anemia", "Normal or mildly raised inflammatory markers"] },
+          { inv: "ANA & Targeted Autoimmune Panel", expected: ["Positive ANA or targeted autoimmune marker", "Negative initial autoimmune screen"] }
+        ],
+        clues: "Identify multisystem autoimmune features and rule out infection or malignancy.",
+        rationale: "Control inflammation and organ threats with appropriate anti-inflammatory/immunosuppressive therapy and rheumatology coordination.",
+        firstLine: ["NSAIDs / Prednisolone / Hydroxychloroquine (Inflammatory symptoms, flares, and baseline CTD control • Route: PO • Duration: per specific CTD & STG)"],
+        secondLine: ["Steroid-sparing immunosuppressants: Azathioprine / Methotrexate / MMF (Severe/organ-threatening CTD • Route: PO or IV • Duration: long-term with monitoring)"],
+        intervention: "Rheumatology referral and targeted biopsy/organ-specific procedures as indicated.",
+        nutritional: "Balanced diet, bone health support (calcium/vitamin D as indicated), and healthy weight.",
+        nonPharma: "Joint protection, physiotherapy, UV protection, smoking cessation, and regular clinical/lab monitoring."
+      },
+      {
+        id: "10.2", ch: 10, sec: "10.2", page: 572,
+        en: "GOUT", am: "ጋውት (Gout)",
+        kw: ["gout", "uric acid", "podagra", "big toe", "arthritis", "ጋውት", "መገጣጠሚያ"],
+        symptoms: ["Sudden severe pain, warmth, and swelling in big toe or joint", "Rapidly worsening joint erythema/tenderness", "Recurrent acute monoarticular arthritis attacks", "Tophi or history of uric acid stones"],
+        invPairs: [
+          { inv: "Serum Uric Acid", expected: ["Elevated serum uric acid", "Normal/low uric acid during acute flare"] },
+          { inv: "Joint Aspiration / Synovial Fluid Analysis", expected: ["Monosodium urate crystals (negative Gram stain)", "Inflammatory fluid awaiting culture"] },
+          { inv: "Affected Joint X-ray / Ultrasound", expected: ["Soft-tissue swelling or double-contour sign", "Normal acute joint radiograph"] }
+        ],
+        clues: "Assess acute monoarticular arthritis, exclude septic arthritis, and check serum uric acid and flare history.",
+        rationale: "Treat acute flares promptly with NSAIDs, colchicine, or corticosteroids; initiate urate-lowering therapy with flare prophylaxis when indicated.",
+        firstLine: ["NSAID e.g. Indomethacin / Naproxen or Colchicine or Corticosteroid (Acute gout flare • Route: PO or Intra-articular • Duration: until flare resolves)"],
+        secondLine: ["Allopurinol + Flare prophylaxis with Colchicine/NSAID (Chronic urate-lowering therapy • Route: PO • Duration: long-term start low & titrate per STG)"],
+        intervention: "Joint aspiration/arthrocentesis if septic arthritis must be ruled out or intra-articular injection is indicated.",
+        nutritional: "Reduce purine-rich foods (organ meats, certain seafood) and alcohol (especially beer); stay well hydrated.",
+        nonPharma: "Rest and apply ice pack during acute flare; avoid starting new allopurinol during acute flare (or continue if already taking)."
+      },
+      {
+        id: "10.3", ch: 10, sec: "10.3", page: 578,
+        en: "OSTEOARTHRITIS", am: "ኦስቲዮአርትራይተስ (Osteoarthritis)",
+        kw: ["osteoarthritis", "knee pain", "hip pain", "joint", "stiffness", "ኦስቲዮአርትራይተስ", "ጉልበት"],
+        symptoms: ["Weight-bearing joint pain worsening with activity", "Brief morning stiffness (< 30 minutes)", "Crepitus or bony joint enlargement", "Reduced joint range of motion"],
+        invPairs: [
+          { inv: "Plain X-ray of Affected Joint", expected: ["Joint space narrowing, osteophytes, or subchondral sclerosis", "Early/mild radiographic change"] },
+          { inv: "CBC & ESR/CRP", expected: ["Normal ESR/CRP (non-inflammatory pattern)", "Mildly elevated markers requiring review"] }
+        ],
+        clues: "Assess activity-related pain, brief morning stiffness, crepitus, function, and GI/renal/CV risk before analgesics.",
+        rationale: "Combine weight loss, exercise, and physical therapy with lowest-effective topical/oral analgesics, reserving surgery for refractory end-stage disease.",
+        firstLine: ["Topical or Oral NSAID / Paracetamol (Osteoarthritis joint pain • Route: Topical or PO • Duration: as needed or scheduled lowest effective dose per STG)"],
+        secondLine: ["Intra-articular corticosteroid or Joint replacement surgery (Refractory symptomatic OA / end-stage joint damage • Route: Intra-articular or Surgical • Duration: per indication)"],
+        intervention: "Orthopedic joint replacement evaluation for severe refractory end-stage osteoarthritis.",
+        nutritional: "Weight reduction if overweight/obese; balanced nutrient-dense diet.",
+        nonPharma: "Low-impact aerobic and joint-strengthening exercises, physical therapy, and assistive devices (cane/braces)."
+      },
+      {
+        id: "10.4", ch: 10, sec: "10.4", page: 581,
+        en: "SYSTEMIC LUPUS ERYTHEMATOUS (SLE) (LUPUS)", am: "ሲስተሚክ ሉፐስ ኤሪቲማቶሰስ (SLE)",
+        kw: ["sle", "lupus", "malar rash", "photosensitivity", "ana", "arthritis", "ሉፐስ"],
+        symptoms: ["Malar or discoid rash / photosensitivity", "Arthralgia or non-erosive arthritis", "Fever, fatigue, or oral ulcers", "Edema or pleuritic chest pain"],
+        invPairs: [
+          { inv: "ANA, Anti-dsDNA & Complement (C3/C4)", expected: ["Positive ANA/anti-dsDNA with low C3/C4", "Positive ANA pending confirmatory panel"] },
+          { inv: "CBC & Urinalysis / Protein:Creatinine", expected: ["Cytopenia or proteinuria/active urine sediment", "Normal CBC and urinalysis"] }
+        ],
+        clues: "Check malar/discoid rash, photosensitivity, arthritis, serositis, cytopenias, ANA/dsDNA/complement, and urinalysis/creatinine.",
+        rationale: "Maintain hydroxychloroquine as foundational therapy, control flares with corticosteroids/immunosuppressants, and protect against UV and infection.",
+        firstLine: ["Hydroxychloroquine (Baseline SLE therapy • Route: PO • Duration: long-term once daily with eye monitoring)", "Corticosteroids / NSAIDs (Acute SLE flares • Route: PO or IV • Duration: titrated per flare & tapered per STG)"],
+        secondLine: ["Mycophenolate mofetil / Azathioprine / Cyclophosphamide (Lupus nephritis or severe/refractory SLE • Route: PO or IV • Duration: per organ protocol & STG)"],
+        intervention: "Renal biopsy or specialist organ management when lupus nephritis or major organ disease is suspected.",
+        nutritional: "Balanced nutrition, bone protection, and sodium adjustment if renal/BP involvement is present.",
+        nonPharma: "Broad-spectrum sunscreen and protective clothing; avoid UV and smoking; keep inactivated vaccinations current."
+      },
+      {
+        id: "10.5", ch: 10, sec: "10.5", page: 585,
+        en: "RAYNAUD’S PHENOMENON", am: "ሬይኖድስ ፊኖሜኖን (Raynaud’s Phenomenon)",
+        kw: ["raynaud", "cold fingers", "color change", "pallor", "cyanosis", "ብርድ", "ጣት"],
+        symptoms: ["Fingers/toes turning pale, blue, then red on cold/stress", "Numbness or tingling in digits", "Pain or throbbing during rewarming", "Fingertip ulcers or severe cold sensitivity"],
+        invPairs: [
+          { inv: "Nailfold Capillaroscopy & Vascular Check", expected: ["Normal loops (primary) or abnormal capillaries (secondary)", "Good digital perfusion without tissue necrosis"] },
+          { inv: "ANA, ESR/CRP & CBC", expected: ["Negative screen (primary) or positive ANA/ESR", "Normal baseline blood counts"] }
+        ],
+        clues: "Document cold/stress-triggered color changes and screen for secondary connective tissue disease or digital ischemia.",
+        rationale: "Prioritize warmth and trigger avoidance; use dihydropyridine calcium-channel blockers for symptoms and escalate if digital ischemia occurs.",
+        firstLine: ["Nifedipine or Amlodipine (Symptomatic Raynaud's phenomenon • Route: PO • Duration: seasonal or ongoing per STG)"],
+        secondLine: ["Sildenafil / Losartan / Prostacyclin analogue (Refractory Raynaud's or digital ischemia/ulcers • Route: PO or IV • Duration: per specialist/STG)"],
+        intervention: "Urgent vascular/rheumatology care if digital ulcers, tissue necrosis, or severe ischemia occurs.",
+        nutritional: "Warm drinks and balanced meals; reduce caffeine and alcohol.",
+        nonPharma: "Keep extremities warm (gloves, socks, warm environment); avoid cold, vibration tools, smoking, and vasoconstrictors."
+      },
+      {
+        id: "10.6", ch: 10, sec: "10.6", page: 587,
+        en: "RHEUMATOID ARTHRITIS (RA)", am: "ሩማቶይድ አርትራይተስ (RA)",
+        kw: ["rheumatoid", "ra", "morning stiffness", "symmetric arthritis", "methotrexate", "ሩማቶይድ"],
+        symptoms: ["Symmetric pain and swelling of small hand/foot joints", "Morning stiffness lasting >= 30–60 minutes", "Fatigue or low-grade constitutional symptoms", "Rheumatoid nodules or functional limitation"],
+        invPairs: [
+          { inv: "Rheumatoid Factor (RF) & Anti-CCP", expected: ["Positive RF and/or Anti-CCP", "Seronegative pending clinical/imaging review"] },
+          { inv: "ESR, CRP & Hand/Wrist X-ray", expected: ["Elevated ESR/CRP or periarticular osteopenia/erosions", "Mildly elevated markers with early joint changes"] }
+        ],
+        clues: "Assess symmetric synovitis, morning stiffness, RF/anti-CCP, ESR/CRP, and baseline labs before DMARD therapy.",
+        rationale: "Start methotrexate with folic acid early using treat-to-target principles, with short-term bridging steroids/NSAIDs and weekly dosing safety.",
+        firstLine: ["Methotrexate + Folic acid (First-line DMARD for RA • Route: PO or SC • Duration: long-term once weekly with folic acid & lab monitoring)", "Short-course Corticosteroid or NSAID (Bridging relief of synovitis/flares • Route: PO • Duration: short-term bridging per STG)"],
+        secondLine: ["Combination cDMARDs or Biologic / Targeted synthetic DMARD (Inadequate response/intolerance to MTX • Route: PO, SC, or IV • Duration: long-term per STG)"],
+        intervention: "Rheumatology co-management and orthopedic/rehabilitation care for persistent synovitis or joint deformity.",
+        nutritional: "Balanced heart-healthy diet, bone health support, and weight control.",
+        nonPharma: "Treat-to-target monitoring, physical/occupational therapy, joint protection, and smoking cessation; strictly avoid daily methotrexate."
+      },
+      {
+        id: "11.1", ch: 11, sec: "11.1", page: 594,
+        en: "DEMENTIA", am: "ዲመንሺያ (Dementia)",
+        kw: ["dementia", "memory loss", "alzheimer", "confusion", "cognitive", "የመርሳት", "ዲመንሺያ"],
+        symptoms: ["Gradual progressive memory loss affecting daily function", "Disorientation, word-finding difficulty, or poor judgment", "Mood, personality, or sleep/behavioral changes", "Wandering or safety concerns"],
+        invPairs: [
+          { inv: "Cognitive & Functional Assessment", expected: ["Progressive memory/executive deficit with preserved alertness", "Mild cognitive impairment requiring follow-up"] },
+          { inv: "TSH, B12, Metabolic Panel & Brain CT/MRI", expected: ["Reversible causes excluded; cortical atrophy/vascular change", "Normal baseline metabolic and structural screen"] }
+        ],
+        clues: "Distinguish gradual progressive cognitive decline from acute delirium/depression; review drugs, nutrition, and caregiver burden.",
+        rationale: "Prioritize structured routine, safety, and caregiver support; consider cholinesterase inhibitors in mild-to-moderate Alzheimer's/mixed dementia.",
+        firstLine: ["Cholinesterase inhibitor e.g. Donepezil (Mild-to-moderate Alzheimer's / mixed dementia • Route: PO • Duration: ongoing once daily per STG)"],
+        secondLine: ["Memantine or Cautious low-dose Antipsychotic (Moderate-to-severe decline or severe refractory behavioral symptoms • Route: PO • Duration: per STG)"],
+        intervention: "Neurology/geriatric/psychiatry assessment for atypical features, reversible causes, or severe behavioral symptoms.",
+        nutritional: "Ensure regular hydration and balanced meals to prevent dehydration and weight loss.",
+        nonPharma: "Cognitive stimulation, structured routine, home fall/wandering safety, caregiver support, and avoiding anticholinergics."
+      },
+      {
+        id: "11.2", ch: 11, sec: "11.2", page: 597,
+        en: "HEADACHE", am: "ራስ ምታት (Headache)",
+        kw: ["headache", "migraine", "tension", "cluster", "throbbing", "ራስ ምታት", "ማይግሬን"],
+        symptoms: ["Throbbing unilateral headache with photophobia/nausea (migraine)", "Bilateral band-like pressure headache (tension)", "Severe periorbital pain with lacrimation (cluster)", "Fever, neck stiffness, or focal neurologic signs (red flags)"],
+        invPairs: [
+          { inv: "Focused Neurologic & Fundoscopic Exam", expected: ["Normal focal neurologic exam (primary headache)", "Focal/meningeal sign requiring urgent workup"] },
+          { inv: "Brain CT/MRI (if red flags/atypical)", expected: ["Normal neuroimaging in uncomplicated headache", "Structural/vascular finding if red flag present"] }
+        ],
+        clues: "Classify tension, migraine, or cluster headache; screen for red flags and medication overuse.",
+        rationale: "Treat acute attacks appropriately, offer prophylaxis for frequent migraines, and prevent medication-overuse headache.",
+        firstLine: ["NSAID e.g. Ibuprofen/Naproxen / Paracetamol / Triptan (Acute tension or migraine attack • Route: PO • Duration: at onset / PRN per STG limits)", "Propranolol / Amitriptyline / Topiramate (Frequent migraine prophylaxis • Route: PO • Duration: several months then reassess per STG)"],
+        secondLine: ["High-flow Oxygen + Sumatriptan / Verapamil or Specialist therapy (Cluster or refractory headache • Route: Inhalation / SC / PO • Duration: per STG)"],
+        intervention: "Urgent neuroimaging/LP or specialist referral if red flags or severe refractory/cluster headache occur.",
+        nutritional: "Avoid skipping meals, stay hydrated, and track/limit dietary triggers or excess caffeine.",
+        nonPharma: "Maintain regular sleep and stress management; avoid frequent analgesic overuse."
+      },
+      {
+        id: "11.3", ch: 11, sec: "11.3", page: 609,
+        en: "MOVEMENT DISORDERS", am: "የእንቅስቃሴ መታወክ (Movement Disorders)",
+        kw: ["parkinson", "tremor", "dystonia", "bradykinesia", "rigidity", "መንቀጥቀጥ", "ፓርኪንሰን"],
+        symptoms: ["Resting or action tremor", "Slowness of movement (bradykinesia) or stiffness/rigidity", "Postural instability or gait changes", "Sudden muscle spasms/dystonia after medication"],
+        invPairs: [
+          { inv: "Focused Movement & Medication Review", expected: ["Bradykinesia/tremor/rigidity or drug-induced dystonia", "Offending dopamine-blocking drug identified"] },
+          { inv: "TSH, Metabolic Panel & Brain MRI", expected: ["Normal TSH/metabolic screen or structural finding", "Atypical feature warranting neurology review"] }
+        ],
+        clues: "Identify tremor, bradykinesia, rigidity, postural instability, or drug-induced dystonia; check offending medications.",
+        rationale: "Improve motor symptoms/tremor or treat acute dystonia while avoiding dopamine-blocking drugs in parkinsonism and preventing falls.",
+        firstLine: ["Levodopa / Carbidopa (Symptomatic Parkinson's disease • Route: PO • Duration: long-term divided doses titrated per STG)", "Propranolol or Primidone (Essential tremor • Route: PO • Duration: ongoing per STG)"],
+        secondLine: ["Dopamine agonist / MAO-B inhibitor / Trihexyphenidyl / Biperiden (Adjunctive PD, tremor, or acute dystonia • Route: PO, IM, or IV • Duration: per STG)"],
+        intervention: "Neurology referral for diagnostic confirmation, titration, or specialist movement-disorder management.",
+        nutritional: "Adjust food/fluid texture if dysphagia is present; maintain adequate fiber and fluids for constipation.",
+        nonPharma: "Physical/occupational therapy, gait/balance training, fall prevention, and avoiding dopamine-blocking drugs."
+      },
+      {
+        id: "11.4", ch: 11, sec: "11.4", page: 615,
+        en: "SEIZURE DISORDER AND EPILEPSY", am: "የሚጥል በሽታ እና ኤፒሌፕሲ",
+        kw: ["seizure", "epilepsy", "convulsion", "fit", "status epilepticus", "ሚጥል", "ኤፒሌፕሲ"],
+        symptoms: ["Episodic convulsions or loss of awareness", "Post-ictal confusion, fatigue, or tongue bite", "Focal motor/sensory aura or twitching", "Prolonged or repeated seizures without recovery"],
+        invPairs: [
+          { inv: "Blood Glucose, Electrolytes & Ca/Mg", expected: ["Normal glucose/electrolytes (epilepsy workup)", "Hypoglycemia or electrolyte derangement corrected"] },
+          { inv: "EEG & Brain CT/MRI", expected: ["Epileptiform activity or structural lesion", "Normal baseline EEG/imaging"] }
+        ],
+        clues: "Obtain seizure history, exclude acute provoked causes or status epilepticus, and choose antiseizure therapy by seizure type and profile.",
+        rationale: "Control seizures with appropriate monotherapy, treat status epilepticus urgently, and reinforce adherence and safety precautions.",
+        firstLine: ["Carbamazepine / Sodium valproate / Lamotrigine / Levetiracetam (Epilepsy monotherapy • Route: PO • Duration: long-term titrated per seizure type & STG)"],
+        secondLine: ["Benzodiazepine followed by Phenytoin / Phenobarbital / Levetiracetam (Status epilepticus or refractory seizures • Route: IV/PR/IM then IV/PO • Duration: per emergency/STG)"],
+        intervention: "Emergency airway/seizure stabilization for status epilepticus; neurology care for refractory epilepsy.",
+        nutritional: "Balanced diet; ensure folic acid supplementation in women of childbearing potential.",
+        nonPharma: "Take medication daily without abrupt cessation; avoid sleep deprivation and alcohol; teach seizure first-aid and safety."
+      },
+      {
+        id: "11.5", ch: 11, sec: "11.5", page: 619,
+        en: "CEREBROVASCULAR DISEASE", am: "የአንጎል የደም ዝውውር በሽታ / ስትሮክ",
+        kw: ["stroke", "tia", "hemiparesis", "aphasia", "cerebrovascular", "ct", "ስትሮክ", "አንጎል"],
+        symptoms: ["Sudden unilateral face, arm, or leg weakness/numbness", "Sudden speech difficulty (aphasia/dysarthria) or vision loss", "Sudden imbalance or severe headache", "Transient focal deficits resolving within 24 hours (TIA)"],
+        invPairs: [
+          { inv: "Urgent Non-Contrast Brain CT", expected: ["Ischemic hypodensity / early normal CT (no bleed)", "Acute intracranial hemorrhage on CT"] },
+          { inv: "Blood Glucose, ECG & Dysphagia Screen", expected: ["Normoglycemia; arrhythmia/risk factor identified", "Dysphagia risk present (keep NPO initially)"] }
+        ],
+        clues: "Assess sudden focal deficits, onset time, glucose, BP, brain CT to exclude hemorrhage, and swallowing before oral intake.",
+        rationale: "Initiate rapid stroke care, confirm imaging before antithrombotics, screen dysphagia first, and control secondary stroke risk factors.",
+        firstLine: ["Aspirin / Clopidogrel + High-intensity Statin (Acute ischemic stroke/TIA & secondary prevention after excluding hemorrhage • Route: PO • Duration: long-term per STG)"],
+        secondLine: ["Anticoagulant Warfarin / DOAC or Carotid/Neurosurgical intervention (Cardioembolic, carotid stenosis, or hemorrhagic indication • Route: PO or Surgical • Duration: per STG)"],
+        intervention: "Urgent neurosurgical/neurovascular evaluation for hemorrhagic stroke, mass effect, or severe carotid stenosis.",
+        nutritional: "Keep nil-by-mouth until dysphagia screen passes; low-sodium, heart-healthy diet once safe swallowing is confirmed.",
+        nonPharma: "Rapid stroke triage, early physiotherapy/rehabilitation, DVT prophylaxis, and BP/diabetes/lipid/smoking control."
+      },
+      {
+        id: "11.6", ch: 11, sec: "11.6", page: 626,
+        en: "VERTIGO", am: "ቨርቲጎ / የመሽከርከር ማዞር (Vertigo)",
+        kw: ["vertigo", "dizziness", "spinning", "bppv", "nausea", "ማዞር", "ቨርቲጎ"],
+        symptoms: ["Spinning sensation triggered or worsened by head movement", "Nausea or vomiting with dizziness", "Brief episodes (BPPV) or continuous vertigo (vestibular neuritis)", "Diplopia, dysarthria, ataxia, or limb weakness (central red flags)"],
+        invPairs: [
+          { inv: "HINTS & Dix-Hallpike Maneuver", expected: ["Positive Dix-Hallpike / peripheral pattern", "Central ocular/neurologic sign requiring urgent care"] },
+          { inv: "Glucose & Orthostatic/BP Check", expected: ["Normal glucose without orthostatic drop", "Abnormal glucose or BP fluctuation"] }
+        ],
+        clues: "Differentiate peripheral vertigo from central stroke/TIA by checking central signs (diplopia, dysarthria, ataxia, weakness).",
+        rationale: "Perform canalith repositioning for BPPV, use vestibular suppressants only briefly if needed, and refer urgently if central signs exist.",
+        firstLine: ["Antihistamine / Antiemetic e.g. Dimenhydrinate / Promethazine / Meclizine (Acute vertigo & nausea/vomiting • Route: PO or IM/IV • Duration: short-term 1–3 days PRN per STG)"],
+        secondLine: ["Etiology-specific therapy / Vestibular rehabilitation (Central cause or persistent vestibular dysfunction • Route: Per cause/rehab • Duration: per protocol)"],
+        intervention: "Urgent neurologic/stroke evaluation if central signs or intractable symptoms are present.",
+        nutritional: "Gradual sips of fluids and light meals as nausea/vomiting improves.",
+        nonPharma: "Epley canalith repositioning maneuver for posterior BPPV, vestibular exercises, and fall precautions; limit antiemetics."
+      },
+      {
+        id: "11.7", ch: 11, sec: "11.7", page: 628,
+        en: "GUILLAIN–BARRÉ SYNDROME (GBS)", am: "ጊላን-ባሬ ሲንድሮም (GBS)",
+        kw: ["gbs", "guillain", "ascending paralysis", "weakness", "areflexia", "ፓራላይዝ", "ድክመት"],
+        symptoms: ["Progressive symmetric ascending leg-to-arm weakness", "Reduced or absent deep tendon reflexes", "Tingling/numbness in hands and feet", "Difficulty swallowing, speech change, or shortness of breath"],
+        invPairs: [
+          { inv: "Respiratory Mechanics (FVC/NIF) & SpO2", expected: ["Preserved or declining respiratory capacity", "Impending respiratory compromise (ICU alert)"] },
+          { inv: "Lumbar Puncture / CSF & NCS/EMG", expected: ["Albuminocytologic dissociation on CSF", "Demyelinating/axonal neuropathy on NCS/EMG"] }
+        ],
+        clues: "Monitor ascending limb weakness, areflexia, bulbar/swallowing function, autonomic instability, and respiratory mechanics.",
+        rationale: "Start IVIG or plasmapheresis promptly in acute GBS and maintain close respiratory/ICU monitoring to prevent respiratory failure.",
+        firstLine: ["Intravenous Immunoglobulin (IVIG) or Plasmapheresis (Acute GBS • Route: IV / Plasma exchange • Duration: standard course per STG/weight)"],
+        secondLine: ["Mechanical ventilation / Neuropathic pain or Autonomic therapy (Respiratory compromise, pain, or dysautonomia • Route: ICU / PO / IV • Duration: per STG)"],
+        intervention: "ICU transfer and mechanical ventilation if respiratory insufficiency or severe bulbar weakness develops.",
+        nutritional: "Assess swallowing before oral intake; provide enteral/specialized high-protein/high-calorie nutrition if bulbar dysfunction exists.",
+        nonPharma: "Continuous respiratory and BP/HR monitoring, DVT/pressure-injury/aspiration prevention, and early rehabilitation."
+      },
+      {
+        id: "11.8", ch: 11, sec: "11.8", page: 629,
+        en: "BELL‘S PALSY", am: "ቤልስ ፓልሲ (Bell’s Palsy)",
+        kw: ["bell", "facial palsy", "facial weakness", "eye closure", "የፊት መጣመም"],
+        symptoms: ["Sudden unilateral facial weakness including forehead", "Incomplete eye closure or tearing/dryness", "Drooping mouth corner or food/fluid pocketing", "Post-auricular ache or altered taste"],
+        invPairs: [
+          { inv: "Cranial Nerve & Eye-Closure Exam", expected: ["Unilateral LMN facial weakness (forehead involved)", "Incomplete eyelid closure needing corneal protection"] },
+          { inv: "Glucose & Otoscopic/Parotid Check", expected: ["Normal otoscopic/parotid exam", "Secondary ear/parotid abnormality noted"] }
+        ],
+        clues: "Confirm acute unilateral lower-motor-neuron facial weakness within 72 hours; exclude central stroke, otitis/zoster, or parotid mass.",
+        rationale: "Initiate early corticosteroids within 72 hours and protect the cornea rigorously when eye closure is incomplete.",
+        firstLine: ["Prednisolone (Acute Bell's palsy within 72 hours • Route: PO • Duration: 5–10 days daily per STG)"],
+        secondLine: ["Acyclovir or Valacyclovir with corticosteroid (Severe Bell's palsy per STG/specialist • Route: PO • Duration: 5–7 days per STG)"],
+        intervention: "Ophthalmology or neurology referral if severe corneal exposure or non-recovery occurs.",
+        nutritional: "Chew/drink carefully on the unaffected side and keep oral hygiene.",
+        nonPharma: "Eye protection (artificial tears/lubricating ointment by day, eye patch/tape at night) and gentle facial exercises."
+      },
+      {
+        id: "11.9", ch: 11, sec: "11.9", page: 630,
+        en: "LOW BACK PAIN", am: "የታችኛው ጀርባ ህመም (Low Back Pain)",
+        kw: ["low back pain", "back pain", "lumbar", "sciatica", "ጀርባ ህመም", "ወገብ"],
+        symptoms: ["Lower-back ache or stiffness after lifting/strain", "Radiating pain down the leg (sciatica/radiculopathy)", "Leg numbness or tingling", "Urinary retention/incontinence or saddle numbness (cauda equina red flag)"],
+        invPairs: [
+          { inv: "Neurologic & Straight-Leg Raise Exam", expected: ["Mechanical back pain or radicular sign without red flag", "Cauda equina / progressive deficit red flag"] },
+          { inv: "Lumbar X-ray/MRI (only if indicated)", expected: ["Degenerative change or normal imaging", "Urgent pathology identified"] }
+        ],
+        clues: "Screen for cauda equina, progressive motor deficit, infection, malignancy, or trauma red flags.",
+        rationale: "Encourage staying active and exercising rather than bed rest, using short-term analgesics safely and escalating for neuropathic pain.",
+        firstLine: ["NSAID or Paracetamol (Acute or chronic low back pain • Route: PO • Duration: short-term / as needed per STG)"],
+        secondLine: ["Duloxetine / Gabapentin / Pregabalin / TCA (Chronic or neuropathic/radicular low back pain • Route: PO • Duration: per STG)"],
+        intervention: "Urgent neurosurgical/orthopedic evaluation if cauda equina or progressive neurologic deficit is suspected.",
+        nutritional: "Balanced diet supporting healthy weight, bone health, and adequate fiber/water.",
+        nonPharma: "Stay active and avoid prolonged bed rest; practice core/back exercises, physical therapy, and proper ergonomics."
+      },
+      {
+        id: "12.1", ch: 12, sec: "12.1", page: 633,
+        en: "BREAST CANCER", am: "የጡት ካንሰር (Breast Cancer)",
+        kw: ["breast cancer", "breast lump", "mammogram", "biopsy", "ጡት ካንሰር", "እብጠት"],
+        symptoms: ["Painless breast lump or thickening", "Nipple retraction, discharge, or skin dimpling/peau d'orange", "Axillary swelling or breast skin change", "Bone/chest pain or weight loss in advanced disease"],
+        invPairs: [
+          { inv: "Mammography & Breast/Axillary Ultrasound", expected: ["Suspicious breast mass/microcalcifications or nodal change", "Benign/inconclusive requiring biopsy correlation"] },
+          { inv: "Core Biopsy + ER/PR/HER2 & Staging", expected: ["Malignant histology with ER/PR/HER2 profile", "Locoregional vs. metastatic staging defined"] }
+        ],
+        clues: "Confirm with exam, imaging, and core biopsy with receptor status (ER, PR, HER2) and staging.",
+        rationale: "Deliver stage- and receptor-specific multidisciplinary therapy alongside lymphedema and psychosocial support.",
+        firstLine: ["Surgery + Chemotherapy / Radiation / Endocrine therapy Tamoxifen or AI (Primary/locoregional & HR+ breast cancer • Route: Surgical / IV / PO / RT • Duration: per oncology protocol)"],
+        secondLine: ["Anti-HER2 therapy e.g. Trastuzumab / Palliative systemic therapy (HER2+ or metastatic/recurrent breast cancer • Route: IV/SC/PO • Duration: per oncology protocol)"],
+        intervention: "Mastectomy or breast-conserving surgery with axillary staging per oncology protocol.",
+        nutritional: "High-protein, nutrient-dense diet to maintain weight, muscle mass, and treatment tolerance.",
+        nonPharma: "Multidisciplinary oncology care, lymphedema prevention/arm physiotherapy, psychosocial support; avoid unnecessary BP/needles on affected arm."
+      },
+      {
+        id: "12.2", ch: 12, sec: "12.2", page: 636,
+        en: "CERVICAL CANCER", am: "የማኅጸን በር ካንሰር (Cervical Cancer)",
+        kw: ["cervical cancer", "cervix", "bleeding", "hpv", "pap", "ማኅጸን በር ካንሰር"],
+        symptoms: ["Postcoital, intermenstrual, or postmenopausal vaginal bleeding", "Foul-smelling or blood-tinged vaginal discharge", "Pelvic pain or lower-back/leg discomfort", "Pallor/fatigue from bleeding-related anemia"],
+        invPairs: [
+          { inv: "Pelvic Exam & Cervical Biopsy / HPV-Pap", expected: ["Cervical lesion confirmed on biopsy", "Abnormal screening requiring colposcopy/biopsy"] },
+          { inv: "CBC, Creatinine & Pelvic/Abdominal Imaging", expected: ["Anemia or local/renal staging findings", "Normal baseline renal function"] }
+        ],
+        clues: "Evaluate abnormal/postcoital bleeding or discharge with pelvic exam, biopsy, and staging; check hemoglobin and renal function.",
+        rationale: "Provide stage-appropriate radical surgery or chemoradiation, manage anemia/pain, and promote HPV vaccination and screening.",
+        firstLine: ["Radical surgery or Chemoradiation Cisplatin-based + RT (Early-stage or locally advanced cervical cancer • Route: Surgical / IV / RT • Duration: per oncology/FIGO protocol)"],
+        secondLine: ["Palliative chemotherapy / Symptom control (Metastatic or recurrent cervical cancer • Route: IV/PO • Duration: per oncology protocol)"],
+        intervention: "Gynecologic-oncology surgery or radiation/brachytherapy per tumor stage.",
+        nutritional: "Iron-rich and balanced high-protein/high-calorie diet to support anemia recovery and therapy.",
+        nonPharma: "Gyne-oncology coordination, pain/anemia care, psychosocial support, and community HPV vaccination/screening education."
+      },
+      {
+        id: "12.3", ch: 12, sec: "12.3", page: 639,
+        en: "COLORECTAL CANCER", am: "የኮሎሬክታል / የትልቁ አንጀት ካንሰር",
+        kw: ["colorectal", "colon", "rectal", "hematochezia", "bowel", "ኮሎሬክታል", "ትልቁ አንጀት"],
+        symptoms: ["Rectal bleeding (hematochezia) or melena", "Change in bowel habits (diarrhea, constipation, or narrow stools)", "Abdominal pain, bloating, or unexplained weight loss", "Fatigue or pallor from iron-deficiency anemia"],
+        invPairs: [
+          { inv: "Colonoscopy & Tissue Biopsy", expected: ["Colorectal mass/lesion confirmed on biopsy", "Stricture/bleeding site identified"] },
+          { inv: "CBC (Hgb/Iron), CEA & CT Staging", expected: ["Iron-deficiency anemia or elevated CEA", "Staging CT clarifying extent of disease"] }
+        ],
+        clues: "Assess altered bowel habits, bleeding, anemia, weight loss, or obstruction; confirm via colonoscopy/biopsy and staging.",
+        rationale: "Perform surgical resection with stage-appropriate adjuvant/neoadjuvant therapy, manage stoma and nutrition, and maintain surveillance.",
+        firstLine: ["Surgical resection ± Adjuvant Chemotherapy FOLFOX/CAPOX / Chemoradiation (Resectable colon/rectal cancer • Route: Surgical / IV / PO / RT • Duration: per oncology protocol)"],
+        secondLine: ["Targeted therapy / Palliative chemotherapy / Metastasectomy (Metastatic/recurrent colorectal cancer • Route: IV/PO/Surgical • Duration: per oncology protocol)"],
+        intervention: "Oncologic bowel resection or urgent surgical intervention for obstruction/perforation.",
+        nutritional: "Balanced nutrition, iron supplementation if anemic, and fiber/fluid adjustment tailored to bowel/stoma status.",
+        nonPharma: "Stoma care education and skin protection, nutritional support, psychosocial care, and structured post-treatment surveillance."
+      },
+      {
+        id: "12.4", ch: 12, sec: "12.4", page: 642,
+        en: "HEPATOCELLULAR CARCINOMA", am: "የጉበት ካንሰር / HCC",
+        kw: ["hepatocellular", "hcc", "liver cancer", "cirrhosis", "ascites", "hbv", "hcv", "ጉበት ካንሰር"],
+        symptoms: ["Right upper quadrant pain or mass", "Abdominal distension/ascites or jaundice", "Weight loss, anorexia, or early satiety", "Confusion/drowsiness (hepatic encephalopathy)"],
+        invPairs: [
+          { inv: "Triphasic Liver CT/MRI & Ultrasound", expected: ["Arterial enhancement with washout / liver mass", "Cirrhosis or ascites identified"] },
+          { inv: "AFP, LFT/INR/Albumin & HBV/HCV Screen", expected: ["Elevated AFP or chronic HBV/HCV/cirrhosis", "Child-Pugh liver reserve assessed"] }
+        ],
+        clues: "Assess chronic liver disease (HBV/HCV/cirrhosis), Child-Pugh liver reserve, AFP/imaging, ascites, and encephalopathy.",
+        rationale: "Select curative, locoregional, or systemic therapy based on stage and liver function while strictly avoiding alcohol and hepatotoxins.",
+        firstLine: ["Surgical resection / Liver transplant / RFA / TACE (Localized HCC with preserved liver function • Route: Surgical / Interventional • Duration: per BCLC/oncology protocol)"],
+        secondLine: ["Sorafenib / Lenvatinib or Best supportive care (Unresectable/advanced HCC • Route: PO • Duration: per oncology & Child-Pugh status)"],
+        intervention: "Hepatic resection, liver transplantation, RFA, or TACE per hepatobiliary/oncology evaluation.",
+        nutritional: "Small frequent meals, adequate calories/protein, and sodium restriction if ascites is present.",
+        nonPharma: "Complete alcohol abstinence, chronic HBV/HCV antiviral care, cirrhosis/ascites/encephalopathy care, and hepatology-oncology follow-up."
+      },
+      {
+        id: "12.5", ch: 12, sec: "12.5", page: 645,
+        en: "PROSTATE CANCER", am: "የፕሮስቴት ካንሰር (Prostate Cancer)",
+        kw: ["prostate cancer", "psa", "urinary", "bone pain", "prostate", "ፕሮስቴት ካንሰር"],
+        symptoms: ["Urinary frequency, hesitancy, weak stream, or retention", "Hematuria or pelvic discomfort", "Back/hip/bone pain in metastatic disease", "Unexplained weight loss or fatigue"],
+        invPairs: [
+          { inv: "Serum PSA & DRE", expected: ["Elevated PSA or abnormal/firm prostate on DRE", "Borderline PSA requiring biopsy correlation"] },
+          { inv: "TRUS Prostate Biopsy & Staging Scan", expected: ["Adenocarcinoma with Gleason score on biopsy", "Staging scan results (localized vs. spread)"] }
+        ],
+        clues: "Evaluate urinary symptoms, bone pain, DRE, PSA, biopsy grade, and staging.",
+        rationale: "Tailor curative surgery/radiation or ADT by stage and risk while protecting bone health and quality of life.",
+        firstLine: ["Radical prostatectomy or Radiation therapy (± ADT) (Localized/locally advanced prostate cancer • Route: Surgical / RT / SC or IM • Duration: per oncology/urology protocol)"],
+        secondLine: ["Androgen Deprivation Therapy LHRH agonist/antagonist or orchiectomy (Advanced/metastatic prostate cancer • Route: SC/IM or Surgical • Duration: long-term per protocol)"],
+        intervention: "Radical prostatectomy, radiation therapy, or surgical/medical androgen deprivation per urology-oncology plan.",
+        nutritional: "Adequate calcium and vitamin D, balanced diet, and metabolic/weight monitoring during ADT.",
+        nonPharma: "Urinary and sexual function counseling, bone fracture prevention, and regular PSA/clinical follow-up."
+      },
+      {
+        id: "12.6", ch: 12, sec: "12.6", page: 649,
+        en: "OVARIAN CANCER", am: "የኦቫሪ / የእንቁላል ከረጢት ካንሰር",
+        kw: ["ovarian cancer", "ovary", "pelvic mass", "bloating", "ascites", "ኦቫሪ ካንሰር"],
+        symptoms: ["Persistent abdominal bloating or distension", "Pelvic/abdominal mass or early satiety", "Ascites or weight loss", "Urinary frequency or bowel pressure symptoms"],
+        invPairs: [
+          { inv: "Pelvic/Abdominal Ultrasound or CT", expected: ["Complex adnexal/pelvic mass or ascites", "Abdominopelvic staging findings"] },
+          { inv: "Serum CA-125 & Cytology/Histopathology", expected: ["Elevated CA-125 or malignant cytology/biopsy", "Baseline labs/nutritional status assessed"] }
+        ],
+        clues: "Assess persistent bloating, pelvic mass, ascites, nutritional status, CA-125/imaging, and pathology.",
+        rationale: "Combine cytoreductive surgery and platinum/taxane chemotherapy with symptom/ascites relief, nutrition, and counseling.",
+        firstLine: ["Cytoreductive surgery + Carboplatin / Paclitaxel (Primary ovarian cancer • Route: Surgical & IV • Duration: per oncology protocol e.g. every 3 weeks)"],
+        secondLine: ["PARP inhibitor / Bevacizumab / Second-line chemotherapy (Maintenance or recurrent/metastatic ovarian cancer • Route: PO or IV • Duration: per oncology protocol)"],
+        intervention: "Cytoreductive surgery and paracentesis for symptomatic tense ascites.",
+        nutritional: "High-protein, small frequent meals and nutritional support tailored to bloating/ascites tolerance.",
+        nonPharma: "Gyne-oncology care, symptom/ascites management, BRCA/genetic counseling, and psychosocial support."
+      },
+      {
+        id: "13.1", ch: 13, sec: "13.1", page: 655,
+        en: "ANXIETY DISORDERS, PTSD AND OCD", am: "የጭንቀት መታወክ፣ PTSD እና OCD",
+        kw: ["anxiety", "ptsd", "ocd", "obsession", "compulsion", "panic", "trauma", "ጭንቀት"],
+        symptoms: ["Excessive worry, restlessness, or panic episodes", "Intrusive trauma memories, nightmares, or hypervigilance (PTSD)", "Repetitive obsessions or compulsions (OCD)", "Palpitations, sweating, or poor sleep"],
+        invPairs: [
+          { inv: "Psychiatric & Trauma/OCD Assessment", expected: ["Anxiety, PTSD, or OCD criteria met", "Co-occurring sleep/panic/trauma symptoms noted"] },
+          { inv: "TSH, Glucose, Substance & Safety Screen", expected: ["Normal TSH/glucose; organic/substance mimic ruled out", "Self-harm/safety risk assessed"] }
+        ],
+        clues: "Distinguish anxiety/panic, PTSD, and OCD; exclude medical/substance mimics and assess self-harm risk.",
+        rationale: "Use SSRIs and targeted psychotherapy (CBT, ERP for OCD, trauma-focused therapy for PTSD) while educating on delayed onset.",
+        firstLine: ["SSRI e.g. Sertraline / Fluoxetine (Anxiety disorders, PTSD, or OCD • Route: PO • Duration: several months to long-term; higher doses often needed in OCD)"],
+        secondLine: ["Alternative SSRI/SNRI or Clomipramine for OCD (Inadequate response to first-line • Route: PO • Duration: per STG)"],
+        intervention: "Mental health/psychiatry referral for severe functional impairment, poor response, or safety concerns.",
+        nutritional: "Limit caffeine and alcohol; maintain regular meals and hydration.",
+        nonPharma: "CBT, ERP for OCD, trauma-focused therapy for PTSD, relaxation/sleep hygiene; avoid abrupt SSRI stopping."
+      },
+      {
+        id: "13.2", ch: 13, sec: "13.2", page: 657,
+        en: "DEPRESSIVE DISORDERS", am: "የመንፈስ ጭንቀት / ዲፕሬሽን",
+        kw: ["depression", "depressive", "sadness", "anhedonia", "insomnia", "fatigue", "ዲፕሬሽን", "ሀዘን"],
+        symptoms: ["Persistent low mood or loss of interest/pleasure (anhedonia)", "Insomnia or hypersomnia and low energy/fatigue", "Poor concentration, appetite/weight change, or guilt", "Thoughts of self-harm or hopelessness"],
+        invPairs: [
+          { inv: "Depression Severity & Suicide Risk Check", expected: ["Depressive episode criteria >= 2 weeks", "Suicide risk level documented"] },
+          { inv: "CBC, TSH, Glucose & B12 Screen", expected: ["Normal TSH/metabolic/B12 screen", "Medical mimic or bipolar history checked"] }
+        ],
+        clues: "Assess depressed mood/anhedonia, neurovegetative signs, medical/bipolar/substance causes, and active suicide risk.",
+        rationale: "Combine psychotherapy and antidepressant therapy with suicide risk monitoring and continuation for at least 6–9 months after remission.",
+        firstLine: ["SSRI e.g. Fluoxetine / Sertraline or TCA e.g. Amitriptyline (Moderate-to-severe depressive disorder • Route: PO • Duration: at least 6–9 months after remission per STG)"],
+        secondLine: ["Alternative antidepressant / Augmentation or ECT (Partial/non-response or severe/suicidal depression • Route: PO or ECT • Duration: per STG/psychiatry)"],
+        intervention: "Urgent psychiatric assessment or inpatient care for active suicidal intent, severe self-neglect, or psychosis.",
+        nutritional: "Balanced regular nutrition and complete avoidance of alcohol/substances.",
+        nonPharma: "Psychotherapy (CBT, IPT), psychoeducation, daily routine/behavioral activation, family support, and suicide risk monitoring."
+      },
+      {
+        id: "13.3", ch: 13, sec: "13.3", page: 660,
+        en: "BIPOLAR SPECTRUM DISORDERS", am: "ባይፖላር መታወክ (Bipolar Spectrum Disorders)",
+        kw: ["bipolar", "mania", "hypomania", "mood swing", "grandiosity", "ባይፖላር"],
+        symptoms: ["Decreased need for sleep with high energy/activity", "Elevated, expansive, or irritable mood / grandiosity", "Rapid speech, impulsivity, or risky behavior", "Alternating depressive or hypomanic episodes"],
+        invPairs: [
+          { inv: "Mood & Safety / Risk Assessment", expected: ["Manic, hypomanic, mixed, or depressive episode", "Safety/agitation risk evaluated"] },
+          { inv: "CBC, Renal/Liver, TSH & Drug Monitoring", expected: ["Baseline renal/liver/thyroid labs safe for therapy", "Lithium/valproate/metabolic monitoring planned"] }
+        ],
+        clues: "Assess manic/hypomanic vs. depressive episodes, medical causes, and safety risk.",
+        rationale: "Stabilize acute mania and prevent relapse with mood stabilizers or antipsychotics, regular sleep, and lab monitoring.",
+        firstLine: ["Mood stabilizer Lithium / Sodium valproate or Antipsychotic Risperidone / Olanzapine / Haloperidol (Acute mania & maintenance • Route: PO or IM • Duration: long-term per STG)"],
+        secondLine: ["Combination mood stabilizer + antipsychotic or Lamotrigine / ECT (Inadequate response / bipolar depression / refractory mania • Route: PO/IM or ECT • Duration: per STG)"],
+        intervention: "Psychiatry specialist care or inpatient admission for severe mania/agitation, psychosis, or safety risk.",
+        nutritional: "Keep steady hydration and salt intake if on lithium (avoid sudden dehydration/salt shifts) and avoid alcohol.",
+        nonPharma: "Psychoeducation, regular sleep schedule, relapse warning signs, family support, and lithium/valproate/metabolic lab checks."
+      },
+      {
+        id: "13.4", ch: 13, sec: "13.4", page: 662,
+        en: "SCHIZOPHRENIA", am: "ስኪዞፍሬንያ (Schizophrenia)",
+        kw: ["schizophrenia", "psychosis", "hallucination", "delusion", "disorganized", "ስኪዞፍሬንያ"],
+        symptoms: ["Auditory/visual hallucinations or fixed delusions", "Disorganized speech or behavior", "Social withdrawal, flat affect, or low motivation", "Suspiciousness or agitation"],
+        invPairs: [
+          { inv: "Mental State, Safety & Delirium Screen", expected: ["Psychotic symptoms without delirium or intoxication", "Safety/agitation level assessed"] },
+          { inv: "Glucose, Lipids, BMI, CBC & LFT", expected: ["Baseline metabolic/CBC/LFT values recorded", "Ongoing metabolic/EPS monitoring planned"] }
+        ],
+        clues: "Evaluate hallucinations, delusions, disorganized thought/behavior, negative symptoms, and rule out delirium or substance psychosis.",
+        rationale: "Treat acute psychosis and maintain remission with lowest effective antipsychotic therapy, monitoring EPS and metabolic effects.",
+        firstLine: ["Antipsychotic Haloperidol / Chlorpromazine / Risperidone / Olanzapine (Acute psychosis & maintenance • Route: PO or IM • Duration: long-term lowest effective dose per STG)"],
+        secondLine: ["Alternative antipsychotic / Long-acting injectable / Clozapine (Non-adherence, poor response, or treatment-resistant schizophrenia • Route: PO or IM depot • Duration: long-term per STG)"],
+        intervention: "Psychiatry specialist care for clozapine initiation/monitoring, depot planning, or severe acute psychosis.",
+        nutritional: "Balanced diet with weight, glucose, and lipid monitoring (especially with atypical antipsychotics).",
+        nonPharma: "Monitor and manage EPS, family psychoeducation, CBT for psychosis, social/vocational rehabilitation, and avoid alcohol/substances."
+      },
+      {
+        id: "13.5", ch: 13, sec: "13.5", page: 668,
+        en: "SUICIDE/SELF-HARM", am: "ራስን ማጥፋት / ራስን መጉዳት",
+        kw: ["suicide", "self-harm", "suicidal", "hopeless", "ራስን ማጥፋት", "ራስን መጉዳት"],
+        symptoms: ["Suicidal thoughts, plan, or intent", "Self-harm behavior or prior attempt", "Severe hopelessness or distress", "Substance intoxication or agitation"],
+        invPairs: [
+          { inv: "Suicide Risk, Intent & Lethal Means Check", expected: ["Ideation/plan/intent/means assessed", "Imminent risk requiring urgent safety/inpatient care"] },
+          { inv: "Medical/Toxicology & Psychiatric Review", expected: ["Self-injury or overdose stabilized/evaluated", "Underlying psychiatric illness identified"] }
+        ],
+        clues: "Directly assess suicidal ideation, plan, intent, access to lethal means, intoxication, and underlying psychiatric illness.",
+        rationale: "Prioritize immediate physical safety, remove lethal means, treat underlying psychiatric illness safely, and involve family/mental health care.",
+        firstLine: ["Targeted psychotropic Antidepressant / Mood stabilizer / Antipsychotic (Underlying psychiatric disorder • Route: PO • Duration: titrated per STG with close safety monitoring)"],
+        secondLine: ["Inpatient psychiatric care / ECT (Imminent suicide risk or severe refractory illness • Route: Inpatient / ECT • Duration: per psychiatric team)"],
+        intervention: "Immediate emergency/inpatient psychiatric care and continuous observation for imminent risk.",
+        nutritional: "Provide regular meals and hydration during close clinical/family supervision.",
+        nonPharma: "Immediate safety and lethal-means restriction, continuous observation, safety plan, family involvement, and urgent mental health referral."
+      },
+      {
+        id: "13.6", ch: 13, sec: "13.6", page: 669,
+        en: "DELIRIUM", am: "ዲሊሪየም (Delirium)",
+        kw: ["delirium", "acute confusion", "agitation", "inattention", "ዲሊሪየም"],
+        symptoms: ["Acute confusion fluctuating over hours/days", "Inattention, disorganized thinking, or altered consciousness", "Agitation, restlessness, or lethargy/somnolence", "Underlying fever, infection, hypoxia, or drug trigger"],
+        invPairs: [
+          { inv: "POC Glucose, SpO2 & Vital Signs", expected: ["Hypoxia, fever, or hypoglycemia identified/corrected", "Acute fluctuating inattention confirmed"] },
+          { inv: "CBC, Electrolytes, Renal/Liver & Urinalysis/CXR", expected: ["Infection, metabolic/electrolyte, or organ trigger found", "Medication/withdrawal trigger reviewed"] }
+        ],
+        clues: "Identify acute fluctuating inattention/confusion and search urgently for infection, hypoxia, metabolic/electrolyte/drug/withdrawal causes.",
+        rationale: "Treat the underlying medical/toxic cause urgently, use non-pharmacological reorientation, and reserve low-dose antipsychotics for severe safety risk.",
+        firstLine: ["Underlying cause correction ± Low-dose Haloperidol (Delirium & severe safety-risk agitation • Route: PO or IM/IV • Duration: short-term low dose per STG)"],
+        secondLine: ["Alternative Antipsychotic or Withdrawal protocol (Refractory agitation or substance withdrawal delirium • Route: PO / IV • Duration: short-term per STG)"],
+        intervention: "Urgent workup and treatment of underlying medical emergencies (sepsis, hypoxia, hypoglycemia, metabolic/organ failure).",
+        nutritional: "Correct dehydration and malnutrition; ensure safe feeding/hydration if aspiration risk is low.",
+        nonPharma: "Reorientation, sleep-wake normalization, glasses/hearing aids, fall/tube-pulling safety, and avoid sedatives/anticholinergics."
+      },
+      {
+        id: "13.7", ch: 13, sec: "13.7", page: 670,
+        en: "SUBSTANCE RELATED DISORDERS", am: "ከሱስ / ከንጥረ-ነገር ጋር የተያያዙ መታወኮች",
+        kw: ["alcohol", "withdrawal", "substance", "opioid", "dependence", "ሱስ", "አልኮሆል"],
+        symptoms: ["Craving, tolerance, or difficulty cutting down substance/alcohol use", "Tremor, sweating, anxiety, or agitation on cessation", "Seizures or confusion/hallucinations in severe withdrawal", "Respiratory depression or pinpoint pupils in opioid overdose"],
+        invPairs: [
+          { inv: "Withdrawal / Intoxication Severity Exam", expected: ["Autonomic/withdrawal signs or intoxication graded", "Overdose/respiratory or seizure risk checked"] },
+          { inv: "Glucose, Electrolytes, LFT & Thiamine Check", expected: ["Electrolyte/glucose/LFT status assessed", "Wernicke prophylaxis/nutrition indicated"] }
+        ],
+        clues: "Assess substance type/pattern, intoxication vs. withdrawal signs, Wernicke risk, and co-occurring psychiatric illness.",
+        rationale: "Manage withdrawal safely (with thiamine and benzodiazepines/protocols as indicated), support relapse prevention, and connect with care.",
+        firstLine: ["Diazepam + Thiamine (Alcohol withdrawal & Wernicke prophylaxis • Route: PO or IV/IM • Duration: per STG withdrawal protocol)", "Naltrexone / Acamprosate / Disulfiram (Alcohol use disorder relapse prevention • Route: PO • Duration: long-term per STG)"],
+        secondLine: ["Methadone / Buprenorphine / Naloxone / Inpatient detox (Opioid dependence/withdrawal/overdose or complicated withdrawal • Route: PO/SL/IM/IV • Duration: per STG)"],
+        intervention: "Inpatient detoxification or addiction/psychiatric specialist care for severe/complicated withdrawal or overdose.",
+        nutritional: "Thiamine supplementation (especially in alcohol use) and balanced nutrition/hydration.",
+        nonPharma: "Motivational interviewing, CBT, relapse prevention, peer/family support, and avoiding alcohol/substances (and alcohol products on disulfiram)."
+      },
+      {
+        id: "14.1", ch: 14, sec: "14.1", page: 674,
+        en: "COUGH", am: "ሳል (Cough)",
+        kw: ["cough", "sputum", "throat", "irritant", "ሳል"],
+        symptoms: ["Dry or productive cough (clear, mucoid, or purulent sputum)", "Throat irritation or post-nasal/airway trigger", "Cough lasting > 2–3 weeks or > 8 weeks", "Hemoptysis, fever, weight loss, or dyspnea (red flags)"],
+        invPairs: [
+          { inv: "Chest X-ray (if persistent cough, fever, or red flags)", expected: ["Clear or minor airway findings on CXR (no consolidation)", "Infiltrate/mass/red-flag finding needing further evaluation"] },
+          { inv: "Sputum Exam / AFB / GeneXpert or Spirometry", expected: ["No acute bacterial pneumonia/TB or airway trigger noted", "Specific sputum/spirometry cause identified"] }
+        ],
+        clues: "Characterize cough duration, sputum/hemoptysis, fever, dyspnea, exposures/ACEi, and red flags.",
+        rationale: "Target treatment to the underlying cause, avoid unnecessary antibiotics for simple viral cough, and evaluate persistent cough or red flags.",
+        firstLine: ["Etiology-directed therapy: Antibiotic / ICS / Bronchodilator / Antihistamine (Underlying cause of cough • Route: PO or Inhaler • Duration: per STG & etiology)"],
+        secondLine: ["Targeted chronic cough management / Specialist referral (Chronic or refractory cough • Route: Per cause/specialist • Duration: per underlying cause)"],
+        intervention: "Chest imaging and pulmonary/specialist referral for chronic cough, hemoptysis, weight loss, or dyspnea.",
+        nutritional: "Adequate fluids and warm soothing drinks to ease throat irritation.",
+        nonPharma: "Avoid smoking, smoke, dust, and airway irritants; seek prompt evaluation if cough persists > 2–3 weeks or red flags appear."
+      },
+      {
+        id: "14.2", ch: 14, sec: "14.2", page: 675,
+        en: "OBSTRUCTIVE LUNG DISEASES", am: "የመተንፈሻ መዘጋት በሽታዎች (Asthma / COPD)",
+        kw: ["asthma", "copd", "wheeze", "dyspnea", "shortness of breath", "inhaler", "spirometry", "አስም", "መተንፈስ"],
+        symptoms: ["Shortness of breath, wheezing, or chest tightness", "Cough with airway limitation / bronchospasm", "Tachypnea or low SpO2 during respiratory flare", "Exercise limitation or recurrent wheezing episodes"],
+        invPairs: [
+          { inv: "Pulse Oximetry (SpO2) & Respiratory Rate", expected: ["Low SpO2 (<92%) or tachypnea during flare", "SpO2/RR stabilizing with bronchodilator/O2"] },
+          { inv: "Spirometry / Peak Flow & Chest X-ray", expected: ["Obstructive pattern / wheeze or bronchodilator response", "Hyperinflation or clear lung fields without lobar consolidation"] }
+        ],
+        clues: "Assess wheeze, dyspnea, exacerbations, inhaler technique, smoking/biomass exposure, SpO2, and spirometry/peak flow.",
+        rationale: "Control airway inflammation and bronchoconstriction with step-appropriate inhalers, treat exacerbations promptly, and stop smoking.",
+        firstLine: ["Inhaled Corticosteroid (ICS) + SABA or ICS-formoterol (Asthma controller & reliever • Route: Inhalation • Duration: ongoing per STG step)", "Bronchodilator (LAMA/LABA) + SABA ± Systemic steroid/antibiotic in exacerbation (COPD • Route: Inhalation & PO/IV in exacerbation • Duration: per STG)"],
+        secondLine: ["ICS/LABA/LAMA Triple therapy / Long-term Oxygen Therapy (Uncontrolled symptoms/exacerbations or chronic severe hypoxemia • Route: Inhalation / O2 • Duration: long-term per STG)"],
+        intervention: "Emergency bronchodilator/oxygen/systemic steroid therapy or hospital/ICU care for severe exacerbation.",
+        nutritional: "Balanced nutrition maintaining weight and respiratory muscle strength in COPD; avoid overly large gas-distending meals if breathless.",
+        nonPharma: "Smoking cessation, inhaler technique training/check, written action plan, pulmonary rehab, and influenza/pneumococcal vaccination."
+      },
+      {
+        id: "14.3", ch: 14, sec: "14.3", page: 692,
+        en: "PNEUMONIA", am: "ሳንባ ምች / ኒሞንያ (Pneumonia)",
+        kw: ["pneumonia", "fever", "cough", "pleuritic", "tachypnea", "spo2", "cxr", "ሳንባ ምች", "ኒሞንያ", "ትኩሳት"],
+        symptoms: ["Fever, chills, or sweats with cough", "Purulent/rusty sputum or pleuritic chest pain", "Tachypnea, dyspnea, or hypoxemia (low SpO2)", "Crackles/consolidation signs or tachycardia/lethargy"],
+        invPairs: [
+          { inv: "Chest X-ray (PA/lateral)", expected: ["Focal/lobar consolidation or infiltrate on CXR", "Patchy/perihilar infiltrate supporting pneumonia"] },
+          { inv: "CBC, Blood Glucose & Renal/Liver Panel", expected: ["Leukocytosis or inflammatory shift on CBC", "Baseline renal/liver/glucose checked for therapy"] },
+          { inv: "Pulse Oximetry (SpO2) & Vitals/Sputum", expected: ["Hypoxemia (low SpO2), tachypnea, tachycardia, or fever", "Purulent sputum / crackles on chest exam"] }
+        ],
+        clues: "Evaluate fever, cough/sputum, pleuritic pain, RR, HR, BP, SpO2, lung exam, severity criteria, and chest X-ray.",
+        rationale: "Start prompt empiric antibiotics matched to severity/setting, provide supplemental oxygen for hypoxemia, and complete the full antibiotic course.",
+        firstLine: ["Amoxicillin or Doxycycline/Macrolide (Mild outpatient CAP • Route: PO • Duration: 5–7 days per STG)", "Ceftriaxone/Ampicillin + Azithromycin (Inpatient non-severe CAP • Route: IV / PO • Duration: 5–7+ days per STG)"],
+        secondLine: ["Broad-spectrum IV Antibiotics + Respiratory support (Severe/ICU pneumonia or resistant pathogens • Route: IV • Duration: per STG/culture/ICU)"],
+        intervention: "Hospital/ICU admission and respiratory/oxygen support for severe pneumonia, hypoxemia, or instability.",
+        nutritional: "Maintain adequate hydration and light, careful nutrition (preventing aspiration if tachypneic or fatigued).",
+        nonPharma: "Supplemental oxygen when SpO2 < 90–92%, antipyretics/analgesics, early mobilization, smoking cessation, and vaccinations; finish full antibiotic course."
+      },
+      {
+        id: "14.4", ch: 14, sec: "14.4", page: 692,
+        en: "BRONCHIECTASIS", am: "ብሮንኪዬክታሲስ (Bronchiectasis)",
+        kw: ["bronchiectasis", "chronic cough", "purulent sputum", "hemoptysis", "ብሮንኪዬክታሲስ", "አክታ"],
+        symptoms: ["Chronic daily cough with abundant purulent sputum", "Recurrent chest infections or exacerbations", "Shortness of breath, crackles, or fatigue", "Hemoptysis (streaks or larger volume)"],
+        invPairs: [
+          { inv: "Chest CT / Chest X-ray", expected: ["Bronchial dilatation / tram-track or ring shadows", "Chronic airway/parenchymal changes"] },
+          { inv: "Sputum Culture, AFB & Spirometry/SpO2", expected: ["Purulent sputum / bacterial growth (AFB checked)", "Airflow obstruction or hypoxemia during flare"] }
+        ],
+        clues: "Assess chronic purulent cough, recurrent infections, hemoptysis, sputum microbiology, and chest imaging.",
+        rationale: "Treat exacerbations with targeted antibiotics, promote daily airway clearance, and seek urgent care for massive hemoptysis.",
+        firstLine: ["Targeted Antibiotic e.g. Amoxicillin-clavulanate / Fluoroquinolone (Acute bronchiectasis exacerbation • Route: PO or IV • Duration: 7–14 days per STG/culture)"],
+        secondLine: ["Long-term Macrolide / Inhaled therapy or Embolization/Surgery (Frequent exacerbations or massive hemoptysis • Route: PO / Inhalation / Interventional • Duration: per STG)"],
+        intervention: "Urgent bronchial artery embolization or thoracic/pulmonary care for massive hemoptysis or severe exacerbation.",
+        nutritional: "Adequate hydration to help mobilize secretions, plus high-protein/high-calorie diet to preserve weight and muscle mass.",
+        nonPharma: "Daily airway clearance (chest physiotherapy, postural drainage, breathing techniques), smoking/irritant avoidance, vaccinations, and pulmonary rehab."
+      }
+    ];
+
+    const STORAGE_KEY = "ebdt_stg4_cases_count";
+    let completedCases = Number(localStorage.getItem(STORAGE_KEY)) || 105;
+    let selectedSymptoms = [];
+    let selectedExpectedResults = [];
+    let candidateRecords = [];
+
+    function updateCaseCounter() {
+      localStorage.setItem(STORAGE_KEY, String(completedCases));
+      document.getElementById("casesCounter").textContent = `Cases Completed: ${completedCases}`;
+      document.getElementById("usageSummaryText").textContent =
+        `Total completed clinical/diagnostic cases recorded on this device: ${completedCases} (STG 4th Ed. Ch 9–14, Pages 510–692).`;
+      document.getElementById("ownerCasesInput").value = completedCases;
+    }
+
+    function saveOwnerCases() {
+      const val = Number(document.getElementById("ownerCasesInput").value);
+      if (!Number.isNaN(val) && val >= 0) {
+        completedCases = Math.floor(val);
+        updateCaseCounter();
+        showView("viewPage1");
+      }
+    }
+
+    function showView(viewId) {
+      document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
+      document.getElementById(viewId).classList.add("active");
+      document.getElementById("navWorkflow").classList.toggle(
+        "active",
+        ["viewPage1", "viewPage2Symptoms", "viewPage3Inv", "viewTreatment"].includes(viewId)
+      );
+      document.getElementById("navUsage").classList.toggle("active", viewId === "viewUsage");
+      document.getElementById("navOwner").classList.toggle("active", viewId === "viewOwner");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function populateDatalist() {
+      const dl = document.getElementById("stgDiagSuggestions");
+      dl.innerHTML = STG4_RECORDS.map((r) => `<option value="${r.en}"></option>`).join("");
+    }
+
+    function parseSystolicBP(bpStr) {
+      const match = String(bpStr || "").match(/(\d{2,3})/);
+      return match ? Number(match[1]) : 0;
+    }
+
+    function scoreRecordsFromContext({ cc = "", dur = "", ward = "", sex = "", age = "", sbp = 0, pr = 0, rr = 0, temp = 0, spo2 = 0, extraText = "" }) {
+      const q = `${cc} ${dur} ${ward} ${sex} ${age} ${extraText}`.toLowerCase();
+      return STG4_RECORDS.map((r) => {
+        let score = 0;
+        r.kw.forEach((k) => {
+          if (q.includes(k.toLowerCase())) score += 3;
+        });
+        if (q.includes(r.en.toLowerCase())) score += 5;
+
+        // Vital signs alignment
+        const isResp = ["14.1", "14.2", "14.3", "14.4"].includes(r.id);
+        const isRenal = ["9.1", "9.2", "9.3", "9.4", "9.7"].includes(r.id);
+        const isPsych = ["13.1", "13.2", "13.3", "13.4", "13.5", "13.6", "13.7"].includes(r.id);
+
+        if ((spo2 > 0 && spo2 < 92) || rr > 22) {
+          if (r.id === "14.3" || r.id === "14.2") score += 3;
+        }
+        if (temp >= 38 && r.id === "14.3") score += 3;
+        if (sbp >= 140 && (r.id === "9.2" || r.id === "9.4")) score += 2;
+        if (ward.toLowerCase().includes("resp") && isResp) score += 2;
+        if (ward.toLowerCase().includes("renal") && isRenal) score += 2;
+        if (ward.toLowerCase().includes("psych") && isPsych) score += 2;
+
+        return { r, score };
+      }).sort((a, b) => b.score - a.score);
+    }
+
+    function enterFourPagePage2Symptoms() {
+      const age = document.getElementById("ageInput").value.trim();
+      const sex = document.getElementById("sexInput").value;
+      const ward = document.getElementById("wardInput").value;
+      const cc = document.getElementById("ccInput").value.trim();
+      const dur = document.getElementById("durInput").value.trim() || "Duration not specified";
+      const sbp = parseSystolicBP(document.getElementById("bpInput").value);
+      const pr = Number(document.getElementById("prInput").value) || 0;
+      const rr = Number(document.getElementById("rrInput").value) || 0;
+      const temp = Number(document.getElementById("tempInput").value) || 0;
+      const spo2 = Number(document.getElementById("spo2Input").value) || 0;
+
+      const ranked = scoreRecordsFromContext({ cc, dur, ward, sex, age, sbp, pr, rr, temp, spo2 });
+      candidateRecords = ranked.filter((x) => x.score > 0).slice(0, 3).map((x) => x.r);
+
+      if (!candidateRecords.length) {
+        if (temp >= 38 || (spo2 > 0 && spo2 < 92) || rr > 22) {
+          candidateRecords = [STG4_RECORDS.find((r) => r.id === "14.3"), STG4_RECORDS.find((r) => r.id === "14.2")].filter(Boolean);
+        } else {
+          candidateRecords = [STG4_RECORDS[0]];
+        }
+      }
+
+      // Primary diagnosis-leading record + closely matched alternatives
+      const leadRecord = candidateRecords[0];
+      const symptomOptions = [];
+      const addSym = (s) => {
+        if (s && !symptomOptions.includes(s)) symptomOptions.push(s);
+      };
+
+      // Prioritize symptoms that lead to a coherent diagnosis from Page 1 inputs
+      leadRecord.symptoms.forEach((s) => addSym(s));
+      if (candidateRecords[1]) {
+        candidateRecords[1].symptoms.slice(0, 2).forEach((s) => addSym(s));
+      }
+
+      if (temp >= 38) addSym(`Fever / elevated temperature (${temp}°C) pointing toward acute infection/inflammation`);
+      if (spo2 > 0 && spo2 < 92) addSym(`Hypoxemia (SpO2 ${spo2}%) supporting impaired oxygenation/parenchymal or airway disease`);
+      if (rr > 22) addSym(`Tachypnea (RR ${rr}/min) supporting respiratory compromise`);
+      if (pr > 100) addSym(`Tachycardia (PR ${pr}/min) accompanying systemic/respiratory stress`);
+
+      const finalSymptoms = symptomOptions.slice(0, 6);
+      selectedSymptoms = [];
+      updateSymptomCounterLabel();
+
+      const page1Summary = [
+        age ? `Age: ${age}` : "",
+        sex !== "Not specified" ? `Sex: ${sex}` : "",
+        ward !== "Auto / All Wards" ? `Ward: ${ward}` : "",
+        sbp ? `BP: ${document.getElementById("bpInput").value.trim()}` : "",
+        pr ? `PR: ${pr}` : "",
+        rr ? `RR: ${rr}` : "",
+        temp ? `Temp: ${temp}°C` : "",
+        spo2 ? `SpO2: ${spo2}%` : ""
+      ].filter(Boolean).join(" • ") || "Basic input";
+
+      document.getElementById("symptomPromptDesc").textContent =
+        `Considering Page 1 ("${cc || "General presentation"}", ${dur}; ${page1Summary}) — select signs/symptoms that point to a specific diagnosis.`;
+
+      const listEl = document.getElementById("relatedSymptomsList");
+      listEl.innerHTML = finalSymptoms
+        .map(
+          (sym, idx) => `
+          <label class="option-item" id="symLabel_${idx}">
+            <input type="checkbox" id="symCb_${idx}" onchange="toggleSymptomSelection(${idx}, '${sym.replace(/'/g, "\\'")}')" />
+            <span>${sym}</span>
+          </label>`
+        )
+        .join("");
+
+      showView("viewPage2Symptoms");
+    }
+
+    function updateSymptomCounterLabel() {
+      const n = selectedSymptoms.length;
+      document.getElementById("symptomClickCount").textContent =
+        `Marked Signs/Symptoms: ${n} ${n >= 1 ? "(Ready to narrow diagnosis)" : "(Mark signs/symptoms pointing to a diagnosis)"}`;
+    }
+
+    function toggleSymptomSelection(idx, symText) {
+      const cb = document.getElementById(`symCb_${idx}`);
+      const lbl = document.getElementById(`symLabel_${idx}`);
+      if (cb.checked) {
+        if (!selectedSymptoms.includes(symText)) selectedSymptoms.push(symText);
+        lbl.classList.add("selected");
+      } else {
+        selectedSymptoms = selectedSymptoms.filter((s) => s !== symText);
+        lbl.classList.remove("selected");
+      }
+      updateSymptomCounterLabel();
+    }
+
+    function enterFourPagePage3Investigations() {
+      const age = document.getElementById("ageInput").value.trim();
+      const sex = document.getElementById("sexInput").value;
+      const ward = document.getElementById("wardInput").value;
+      const cc = document.getElementById("ccInput").value.trim() || "Not specified";
+      const dur = document.getElementById("durInput").value.trim() || "Duration not specified";
+      const sbp = parseSystolicBP(document.getElementById("bpInput").value);
+      const pr = Number(document.getElementById("prInput").value) || 0;
+      const rr = Number(document.getElementById("rrInput").value) || 0;
+      const temp = Number(document.getElementById("tempInput").value) || 0;
+      const spo2 = Number(document.getElementById("spo2Input").value) || 0;
+
+      // Refine diagnosis ranking using Page 1 + Page 2 selected signs/symptoms
+      const refined = scoreRecordsFromContext({
+        cc, dur, ward, sex, age, sbp, pr, rr, temp, spo2,
+        extraText: selectedSymptoms.join(" ")
+      });
+      const focusRecord = refined[0]?.r || candidateRecords[0] || STG4_RECORDS[0];
+
+      document.getElementById("invPromptDesc").textContent =
+        `Generated from Page 1 ("${cc}") & Page 2 (${selectedSymptoms.length ? selectedSymptoms.join("; ") : "No extra symptom marked"}). Click investigations & their expected result options below.`;
+
+      const pairs = [...(focusRecord.invPairs || [])];
+      if (refined[1] && refined[1].r.id !== focusRecord.id && refined[1].r.invPairs?.[0]) {
+        pairs.push(refined[1].r.invPairs[0]);
+      }
+
+      selectedExpectedResults = [];
+
+      const containerEl = document.getElementById("investigationWithExpectedList");
+      containerEl.innerHTML = pairs
+        .slice(0, 4)
+        .map((pair, pIdx) => {
+          const expHtml = pair.expected
+            .map(
+              (expText, eIdx) => `
+              <label class="exp-option-item" id="expLabel_${pIdx}_${eIdx}">
+                <input
+                  type="checkbox"
+                  class="exp-res-cb"
+                  id="expCb_${pIdx}_${eIdx}"
+                  value="${expText.replace(/"/g, "&quot;")}"
+                  onchange="toggleExpectedOption(${pIdx}, ${eIdx}, '${expText.replace(/'/g, "\\'")}')"
+                />
+                <span>${expText}</span>
+              </label>`
+            )
+            .join("");
+
+          return `
+            <div class="inv-group-card" id="invCard_${pIdx}">
+              <label class="inv-header-row">
+                <input
+                  type="checkbox"
+                  class="inv-mod-cb"
+                  id="invCb_${pIdx}"
+                  value="${pair.inv.replace(/"/g, "&quot;")}"
+                  checked
+                  onchange="updateInvAndExpectedCounts()"
+                />
+                <span>Investigation ${pIdx + 1}: ${pair.inv}</span>
+              </label>
+              <div class="exp-sub-label">Expected Result Options (Click to select):</div>
+              <div class="exp-sub-list">${expHtml}</div>
+            </div>`;
+        })
+        .join("");
+
+      updateInvAndExpectedCounts();
+      showView("viewPage3Inv");
+    }
+
+    function toggleExpectedOption(pIdx, eIdx, expText) {
+      const cb = document.getElementById(`expCb_${pIdx}_${eIdx}`);
+      const lbl = document.getElementById(`expLabel_${pIdx}_${eIdx}`);
+      if (cb.checked) {
+        if (!selectedExpectedResults.includes(expText)) selectedExpectedResults.push(expText);
+        if (lbl) lbl.classList.add("selected");
+      } else {
+        selectedExpectedResults = selectedExpectedResults.filter((x) => x !== expText);
+        if (lbl) lbl.classList.remove("selected");
+      }
+      updateInvAndExpectedCounts();
+    }
+
+    function updateInvAndExpectedCounts() {
+      const invCount = document.querySelectorAll(".inv-mod-cb:checked").length;
+      document.getElementById("invSelectedCount").textContent =
+        `Marked Investigations: ${invCount}`;
+      document.getElementById("expectedResultCount").textContent =
+        `Clicked Expected Results: ${selectedExpectedResults.length}`;
+    }
+
+    function collectCaseMeta(modeLabel) {
+      const age = document.getElementById("ageInput").value.trim();
+      const wt = document.getElementById("weightInput").value.trim();
+      const sex = document.getElementById("sexInput").value;
+      const ward = document.getElementById("wardInput").value;
+      const bp = document.getElementById("bpInput").value.trim();
+      const pr = document.getElementById("prInput").value.trim();
+      const rr = document.getElementById("rrInput").value.trim();
+      const temp = document.getElementById("tempInput").value.trim();
+      const spo2 = document.getElementById("spo2Input").value.trim();
+
+      const demo = [
+        age ? `Age: ${age}` : "",
+        wt ? `Wt: ${wt} kg` : "",
+        sex !== "Not specified" ? `Sex: ${sex}` : "",
+        ward !== "Auto / All Wards" ? `Ward: ${ward}` : ""
+      ].filter(Boolean).join(" • ") || "Not specified";
+
+      const vitals = [
+        bp ? `BP: ${bp}` : "",
+        pr ? `PR: ${pr}` : "",
+        rr ? `RR: ${rr}` : "",
+        temp ? `Temp: ${temp}°C` : "",
+        spo2 ? `SpO2: ${spo2}%` : ""
+      ].filter(Boolean).join(" • ") || "Not specified";
+
+      return { modeLabel, demo, vitals };
+    }
+
+    function enterFourPagePage4Treatment() {
+      const age = document.getElementById("ageInput").value.trim();
+      const sex = document.getElementById("sexInput").value;
+      const ward = document.getElementById("wardInput").value;
+      const cc = document.getElementById("ccInput").value.trim() || "Not specified";
+      const dur = document.getElementById("durInput").value.trim() || "Duration not specified";
+      const sbp = parseSystolicBP(document.getElementById("bpInput").value);
+      const pr = Number(document.getElementById("prInput").value) || 0;
+      const rr = Number(document.getElementById("rrInput").value) || 0;
+      const temp = Number(document.getElementById("tempInput").value) || 0;
+      const spo2 = Number(document.getElementById("spo2Input").value) || 0;
+
+      const chosenMods = Array.from(document.querySelectorAll(".inv-mod-cb:checked")).map((c) => c.value);
+      const extraInv = document.getElementById("customInvInput").value.trim();
+      if (extraInv) chosenMods.push(extraInv);
+
+      const finalScored = scoreRecordsFromContext({
+        cc, dur, ward, sex, age, sbp, pr, rr, temp, spo2,
+        extraText: `${selectedSymptoms.join(" ")} ${chosenMods.join(" ")} ${selectedExpectedResults.join(" ")}`
+      });
+
+      const bestMatch = finalScored[0]?.r || candidateRecords[0] || STG4_RECORDS[0];
+
+      const meta = collectCaseMeta("4-Page Clinical Flow (Page 1 Inputs → Page 2 Signs/Symptoms → Page 3 Investigations & Expected Results → Page 4 Diagnosis & Treatment)");
+      completedCases += 1;
+      updateCaseCounter();
+
+      const invWithExpected = [
+        chosenMods.length ? `Investigations: ${chosenMods.join("; ")}` : "Investigations: None",
+        selectedExpectedResults.length ? `Clicked Expected Results: ${selectedExpectedResults.join("; ")}` : "Expected Results: None clicked"
+      ].join(" | ");
+
+      renderTreatmentSheet({
+        stepBadge: "Page 4 of 4 (4-Page Clinical Flow) • Diagnosis & Treatment",
+        diagnosisHeading: `${bestMatch.en} — ${bestMatch.am} (STG 4th Ed. Ch ${bestMatch.ch}, p. ${bestMatch.page})`,
+        modeInfo: meta.modeLabel,
+        demoInfo: meta.demo,
+        vitalsInfo: meta.vitals,
+        symptomsInfo: `${cc} (${dur}) • Marked Signs/Symptoms: ${selectedSymptoms.length ? selectedSymptoms.join(", ") : "None"}`,
+        invInfo: invWithExpected,
+        record: bestMatch,
+        backAction: "showView('viewPage1')",
+        backLabel: "← Start New Case (Page 1)"
+      });
+    }
+
+    function enterTwoPageDirect() {
+      const typedDiag = document.getElementById("directDiagInput").value.trim();
+      const notes = document.getElementById("directNotesInput").value.trim() || "Duration/Notes not specified";
+
+      const query = `${typedDiag} ${notes}`.trim().toLowerCase();
+      const matched =
+        STG4_RECORDS.find(
+          (r) =>
+            r.en.toLowerCase().includes(query) ||
+            r.am.toLowerCase().includes(query) ||
+            r.kw.some((k) => query.includes(k.toLowerCase()))
+        ) || scoreRecordsFromContext({ cc: query }).[0]?.r || STG4_RECORDS[0];
+
+      const displayDiag = typedDiag
+        ? `${typedDiag} (${notes}) — Matched STG: ${matched.en} [p. ${matched.page}]`
+        : `${matched.en} — ${matched.am} (${notes}) [p. ${matched.page}]`;
+
+      const meta = collectCaseMeta("2-Page Direct Diagnosis Flow (Direct Diagnosis → Treatment & Care Plan)");
+      completedCases += 1;
+      updateCaseCounter();
+
+      renderTreatmentSheet({
+        stepBadge: "Page 2 of 2 (2-Page Direct Diagnosis) • Treatment & Care Plan",
+        diagnosisHeading: displayDiag,
+        modeInfo: meta.modeLabel,
+        demoInfo: meta.demo,
+        vitalsInfo: meta.vitals,
+        symptomsInfo: `Direct Diagnosis shortcut (${notes})`,
+        invInfo: "Skipped (2-Page Direct Flow)",
+        record: matched,
+        backAction: "showView('viewPage1')",
+        backLabel: "← Back to Page 1 (Diagnosis)"
+      });
+    }
+
+    function renderTreatmentSheet(cfg) {
+      const toBullets = (arr) => arr.map((x) => `<li>${x}</li>`).join("");
+      document.getElementById("treatmentSheet").innerHTML = `
+        <div class="step-badge">${cfg.stepBadge}</div>
+        <h2>${cfg.diagnosisHeading}</h2>
+        <div class="info-box">
+          <strong>Flow Mode:</strong> ${cfg.modeInfo}<br/>
+          <strong>Demographics &amp; Ward:</strong> ${cfg.demoInfo}<br/>
+          <strong>Vital Signs:</strong> ${cfg.vitalsInfo}<br/>
+          <strong>Chief Complaint / Signs &amp; Symptoms:</strong> ${cfg.symptomsInfo}<br/>
+          <strong>Investigations &amp; Expected Results:</strong> ${cfg.invInfo}
+        </div>
+
+        <div class="teach-box">
+          <strong>Teaching — Key Clinical Clues:</strong> ${cfg.record.clues}<br/><br/>
+          <strong>Evidence &amp; Action Rationale:</strong> ${cfg.record.rationale}
+        </div>
+
+        <div class="tx-block">
+          <h3>First-Line Pharmacological Treatment (Drug • Dose • Route • Duration)</h3>
+          <ul>${toBullets(cfg.record.firstLine)}</ul>
+        </div>
+
+        <div class="tx-block">
+          <h3>Second-Line Pharmacological Treatment (Drug • Dose • Route • Duration)</h3>
+          <ul>${toBullets(cfg.record.secondLine)}</ul>
+        </div>
+
+        <div class="tx-block">
+          <h3>Surgical / Palliative / Obstetric Intervention</h3>
+          <ul><li>${cfg.record.intervention}</li></ul>
+        </div>
+
+        <div class="tx-block">
+          <h3>Nutritional Recommendations</h3>
+          <ul><li>${cfg.record.nutritional}</li></ul>
+        </div>
+
+        <div class="tx-block">
+          <h3>Non-Pharmacological / Psychosocial / Spiritual Care &amp; Things to Avoid</h3>
+          <ul><li>${cfg.record.nonPharma}</li></ul>
+        </div>
+
+        <button class="btn btn-blue" onclick="${cfg.backAction}">${cfg.backLabel}</button>
+      `;
+      showView("viewTreatment");
+    }
+
+    populateDatalist();
+    updateCaseCounter();
+  </script>
+</body>
+</html>
